@@ -34,7 +34,7 @@
       "enabled" : true,
       "alwaysDisplayInConsole" : false,
       "clientAuthenticatorType" : "client-secret",
-      "secret" : "kFdfYNqWFPtb9UALCXNc4yhsS2zrX0XV",
+      "secret" : "CeCdMsVRRWjUKobxGtvH1mnc0PR08esW",
       "redirectUris" : [ "*" ],
       "webOrigins" : [ "*" ],
       "notBefore" : 0,

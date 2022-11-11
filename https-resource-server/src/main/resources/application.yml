@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: alfa-skillbox-https-resource-server
+  profiles:
+    active: local

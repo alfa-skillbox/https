@@ -8,11 +8,14 @@ services:
             KEYCLOAK_PASSWORD: 'admin'
             DB_VENDOR: 'h2'
             SERVER_KEYSTORE_PASSWORD: 'qwerty'
-            KEYCLOAK_IMPORT: "/tmp/realm-config.json"
+#            PROXY_ADDRESS_FORWARDING: 'true'
+            KEYCLOAK_IMPORT: "/tmp/example-realm.json"
         volumes:
-            - ./imports/keycloak:/tmp
+            - ./imports/keycloak/localhost.keycloak.crt:/etc/x509/https/tls.crt
+            - ./imports/keycloak/localhost.keycloak.key.pem:/etc/x509/https/tls.key
+            - ./imports/keycloak/realm-config.json:/tmp/example-realm.json
         ports:
-            - "8888:8080"
+            - "8443:8443"
 
     postgre:
         image: 'postgres:11'
@@ -20,12 +23,12 @@ services:
         networks:
           - bd
         environment:
-            POSTGRES_DB: alfa_skillbox_module_tests_db
+            POSTGRES_DB: alfa_skillbox_https_resource_server_db
             POSTGRES_USER: postgre
             POSTGRES_PASSWORD: postgre
         volumes:
-            - './imports/postgre/init/init-db-schema.sql://docker-entrypoint-initdb.d/init-db-schema.sql'
-            - './data/postgre:/var/lib/postgresql/data'
+            - ./imports/postgre/init/init-db-schema.sql://docker-entrypoint-initdb.d/init-db-schema.sql
+            - ./data/postgre:/var/lib/postgresql/data
         ports:
             - '5432:5432'
     adminer:
