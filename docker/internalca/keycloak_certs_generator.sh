@@ -4,24 +4,25 @@ set -ex
 ######################
 # VARS
 ######################
-KEYCLOAK=keycloak
+# Use your own domain name
+NAME=localhost
+######################
+KEYCLOAK=$NAME.keycloak
 KEYCLOAK_PATH=./keycloak
 KEYCLOAK_IMPORT_PATH=../imports/$KEYCLOAK
 ROOT_PATH=./root
 ROOT_CERT_KEY_NAME=rootCA.key.pem
 ROOT_CERT_PEM_NAME=rootCA.cert.pem
-# Use your own domain name
-NAME=localhost
 
 # Generate a server private key
-openssl genrsa -out $KEYCLOAK_PATH/$NAME.$KEYCLOAK.key.pem 2048
+openssl genrsa -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem 2048
 
 # Create a certificate-signing request
-openssl req -new -key $KEYCLOAK_PATH/$NAME.$KEYCLOAK.key.pem -out $KEYCLOAK_PATH/$NAME.$KEYCLOAK.csr \
+openssl req -new -key $KEYCLOAK_PATH/$KEYCLOAK.key.pem -out $KEYCLOAK_PATH/$KEYCLOAK.csr \
         -subj "/CN=localhost"
 
 # Create a config file for the extensions
->$KEYCLOAK_PATH/$NAME.$KEYCLOAK.ext cat <<-EOF
+>$KEYCLOAK_PATH/$KEYCLOAK.ext cat <<-EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 extendedKeyUsage=serverAuth,clientAuth
@@ -36,19 +37,19 @@ EOF
 
 # Create the signed server certificate
 openssl x509 -req \
-    -in $KEYCLOAK_PATH/$NAME.$KEYCLOAK.csr \
+    -in $KEYCLOAK_PATH/$KEYCLOAK.csr \
     -CA $ROOT_PATH/$ROOT_CERT_PEM_NAME \
     -passin pass:qwerty \
     -CAkey $ROOT_PATH/$ROOT_CERT_KEY_NAME \
-    -CAcreateserial -CAserial $KEYCLOAK_PATH/$NAME.$KEYCLOAK.srl\
-    -out $KEYCLOAK_PATH/$NAME.$KEYCLOAK.crt \
+    -CAcreateserial -CAserial $KEYCLOAK_PATH/$KEYCLOAK.srl\
+    -out $KEYCLOAK_PATH/$KEYCLOAK.crt \
     -days 825 -sha256 \
-    -extfile $KEYCLOAK_PATH/$NAME.$KEYCLOAK.ext
+    -extfile $KEYCLOAK_PATH/$KEYCLOAK.ext
 
 # copy to keycloak imports directory
-cp $KEYCLOAK_PATH/$NAME.$KEYCLOAK.key.pem $KEYCLOAK_IMPORT_PATH
-cp $KEYCLOAK_PATH/$NAME.$KEYCLOAK.crt $KEYCLOAK_IMPORT_PATH
+cp $KEYCLOAK_PATH/$KEYCLOAK.key.pem $KEYCLOAK_IMPORT_PATH
+cp $KEYCLOAK_PATH/$KEYCLOAK.crt $KEYCLOAK_IMPORT_PATH
 
 # change modification to key and crt keycloak files
-chmod 655 $KEYCLOAK_IMPORT_PATH/$NAME.$KEYCLOAK.key.pem
-chmod 655 $KEYCLOAK_IMPORT_PATH/$NAME.$KEYCLOAK.crt
+chmod 655 $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.key.pem
+chmod 655 $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.crt

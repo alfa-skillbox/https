@@ -8,10 +8,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableFeignClients
 @EnableWebSecurity
 @SpringBootApplication
-public class HttpsClientApplication {
+public class HttpsResourceServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HttpsClientApplication.class, args);
+        SpringApplication.run(HttpsResourceServerApplication.class, args);
     }
 
 }

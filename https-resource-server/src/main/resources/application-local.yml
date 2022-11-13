@@ -22,8 +22,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          #TODO поменять на валидацию через кейклок
           check-token-uri: '${uri.balancer.keycloak}/auth/realms/azon-minio-local/protocol/openid-connect/token/introspect'
+          #TODO поменять на валидацию через кейклок
 #          jwkSetUri: '${keycloak.uri}/auth/realms/alfa-skillbox/protocol/openid-connect/certs'
 logging:
   level:

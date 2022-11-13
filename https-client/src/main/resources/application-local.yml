@@ -1,0 +1,49 @@
+keycloak.uri: 'https://localhost:8443'
+server:
+  port: 9090
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            #issuer-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https'
+            check-token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token/introspect'
+            token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token'
+#            authorization-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/auth'
+#            end_session_endpoint: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/logout'
+#            userinfoUri: "${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/userinfo"
+#            jwkSetUri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/certs'
+#            user-name-attribute: 'preferred_username'
+        registration:
+          httpsClient:
+            provider: 'keycloak'
+            client-id: 'https-client'
+            client-secret: 'CeCdMsVRRWjUKobxGtvH1mnc0PR08esW'
+#            client-name: 'Minio Authorization Server/Identity Provider'
+#            scope: 'openid,profile'
+            authorization-grant-type: 'client_credentials'
+#            redirect-uri: '${uri.balancer.gateway}/login/oauth2/code/keycloak'
+#      resourceserver:
+#        jwt:
+#          check-token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token/introspect'
+          #TODO поменять на валидацию через кейклок
+#          jwkSetUri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/certs'
+logging:
+  level:
+    org.springframework: DEBUG
+
+feign:
+  client:
+    config:
+      rest-json-validation:
+        connectTimeout: 2000
+        readTimeout: 2000
+  clients:
+    rest-json-validation:
+      retryer:
+        period: 1000
+        maxPeriod: 1000
+      name: 'rest-json-validation'
+      url: 'https://assertible.com'
+      path: 'json'

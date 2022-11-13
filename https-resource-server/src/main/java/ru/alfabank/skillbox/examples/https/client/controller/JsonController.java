@@ -1,6 +1,7 @@
 package ru.alfabank.skillbox.examples.https.client.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,12 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.alfabank.skillbox.examples.https.dto.JsonStateResponse;
-import ru.alfabank.skillbox.examples.https.services.JsonService;
+import ru.alfabank.skillbox.examples.https.client.dto.JsonStateResponse;
+import ru.alfabank.skillbox.examples.https.client.services.JsonService;
 
 import javax.validation.constraints.NotEmpty;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @Validated
