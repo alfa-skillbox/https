@@ -1,5 +1,5 @@
 # keycloak uri из docker-compose.yml
-keycloak.uri: 'http://localhost:8888'
+keycloak.uri: 'https://localhost:8443'
 spring:
   datasource:
     name: "alfa-skillbox-https-resource-server"
@@ -22,7 +22,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          check-token-uri: '${uri.balancer.keycloak}/auth/realms/azon-minio-local/protocol/openid-connect/token/introspect'
+          check-token-uri: '${keycloak.uri}/auth/realms/azon-minio-local/protocol/openid-connect/token/introspect'
           #TODO поменять на валидацию через кейклок
 #          jwkSetUri: '${keycloak.uri}/auth/realms/alfa-skillbox/protocol/openid-connect/certs'
 logging:

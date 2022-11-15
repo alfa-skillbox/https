@@ -1,5 +1,6 @@
 package ru.alfabank.skillbox.examples.https.server.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.alfabank.skillbox.examples.https.server.dto.HttpsServerResponse;
+import ru.alfabank.skillbox.examples.https.server.service.HttpsServerClient;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,34 +28,27 @@ import javax.validation.constraints.NotEmpty;
 @RequestMapping(value = "/api/gateway/json",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class ClientController {
 
-    @Autowired
-    private OAuth2AuthorizedClientManager authorizedClientManager;
-//    private final JsonService jsonService;
+    private final OAuth2AuthorizedClientManager authorizedClientManager;
+    private final HttpsServerClient httpsServerClient;
 
     @PostMapping("/save")
-    public ResponseEntity<String> validateAndSave(@RequestBody @NotEmpty String rawJson) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<HttpsServerResponse> validateAndSave(@RequestBody @NotEmpty String rawJson) {
+        return httpsServerClient.invokeSave(rawJson);
     }
 
     @GetMapping("/find")
     public ResponseEntity<String> getJson(@RequestParam("id") String id) {
-        return ResponseEntity.ok().build();
+        return httpsServerClient.invokeFind(id);
     }
 
     @GetMapping("/")
-    public ResponseEntity<String> index(Authentication authentication,
-                        HttpServletRequest servletRequest,
-                        HttpServletResponse servletResponse) {
+    public ResponseEntity<String> index() {
 
         OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("httpsClient")
                 .principal("https-client")
-                .attributes(attrs -> {
-                    attrs.put(HttpServletRequest.class.getName(), servletRequest);
-                    attrs.put(HttpServletResponse.class.getName(), servletResponse);
-                })
                 .build();
         OAuth2AuthorizedClient authorizedClient = this.authorizedClientManager.authorize(authorizeRequest);
 

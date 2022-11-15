@@ -16,6 +16,10 @@ configurations {
     }
 }
 
+//bootRun {
+//
+//}
+
 repositories {
     mavenCentral()
 }

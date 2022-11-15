@@ -9,17 +9,39 @@ NAME=localhost
 ######################
 KEYCLOAK=$NAME.keycloak
 KEYCLOAK_PATH=./keycloak
-KEYCLOAK_IMPORT_PATH=../imports/$KEYCLOAK
+KEYCLOAK_KEY_PASSWORD=keycloak_password
+KEYCLOAK_STORE_PASSWORD=keycloak_password
+KEYCLOAK_IMPORT_PATH=../imports/keycloak
 ROOT_PATH=./root
 ROOT_CERT_KEY_NAME=rootCA.key.pem
 ROOT_CERT_PEM_NAME=rootCA.cert.pem
 
-# Generate a server private key
-openssl genrsa -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem 2048
+# Generate keycloak private and public key pair
+#openssl genrsa -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem 2048
+
+# Generate keycloak private key
+keytool -genseckey -dname "CN=keycloak_local" \
+      -alias keycloak_local \
+      -keysize 2048 \
+      -keyalg RSA \
+      -keypass $KEYCLOAK_KEY_PASSWORD \
+      -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+      -storepass $KEYCLOAK_STORE_PASSWORD \
+      -validity 3650
+
+keytool -certreq -dname "CN=keycloak_local" \
+      -alias keycloak_local \
+      -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+      -storepass $KEYCLOAK_STORE_PASSWORD \
+      -file $KEYCLOAK_PATH/$KEYCLOAK.csr
 
 # Create a certificate-signing request
-openssl req -new -key $KEYCLOAK_PATH/$KEYCLOAK.key.pem -out $KEYCLOAK_PATH/$KEYCLOAK.csr \
-        -subj "/CN=localhost"
+#openssl req -new -key $KEYCLOAK_PATH/$KEYCLOAK.key.pem -out $KEYCLOAK_PATH/$KEYCLOAK.csr \
+#        -subj "/CN=keycloak_local"
+#keytool -certreq -alias keycloak_pair \
+#        -storepass $KEYCLOAK_STORE_PASSWORD \
+#        -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+#        -file $KEYCLOAK_PATH/$KEYCLOAK.csr
 
 # Create a config file for the extensions
 >$KEYCLOAK_PATH/$KEYCLOAK.ext cat <<-EOF
@@ -46,9 +68,24 @@ openssl x509 -req \
     -days 825 -sha256 \
     -extfile $KEYCLOAK_PATH/$KEYCLOAK.ext
 
+
+## export private key from keycloak keystore
+## step 1 - converting to pkcs12 using keytool
+#keytool -importkeystore \
+#      -srckeystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+#      -srcstorepass $KEYCLOAK_STORE_PASSWORD \
+#      -destkeystore $KEYCLOAK_PATH/$KEYCLOAK.p12 \
+#      -deststoretype PKCS12 \
+#      -srcalias keycloak_pair \
+#      -deststorepass $KEYCLOAK_STORE_PASSWORD \
+#      -destkeypass $KEYCLOAK_KEY_PASSWORD
+#
+## step 2 - export private key using openssl
+#openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nocerts -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem -password pass:$KEYCLOAK_STORE_PASSWORD
+
 # copy to keycloak imports directory
-cp $KEYCLOAK_PATH/$KEYCLOAK.key.pem $KEYCLOAK_IMPORT_PATH
-cp $KEYCLOAK_PATH/$KEYCLOAK.crt $KEYCLOAK_IMPORT_PATH
+cp $KEYCLOAK_PATH/$KEYCLOAK.key.pem $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.key.pem
+cp $KEYCLOAK_PATH/$KEYCLOAK.crt $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.crt
 
 # change modification to key and crt keycloak files
 chmod 655 $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.key.pem

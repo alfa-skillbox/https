@@ -10,14 +10,34 @@ NAME=localhost
 ROOT_PATH=./root
 ROOT_CERT_KEY_NAME=rootCA.key.pem
 ROOT_CERT_PEM_NAME=rootCA.cert.pem
+ROOT_CERT_CRT_NAME=rootCA.cert.crt
 CLIENT=$NAME.client
 CLIENT_PATH=./client-java
+RESOURCE_PATH=../../https-client/src/main/resources
 ######################
 # Passwords
 ######################
-P12_PASSWORD=qwerty
+TRUSTSTORE_PASSWORD=qwerty
 JKS_PASSWORD=asdfgh
+
+#openssl x509 -in <(openssl s_client -showcerts -verify 2 -connect localhost:8443</dev/null) \
+#openssl x509 -in <(openssl s_client -showcerts -verify 2 -connect localhost:8443 < /dev/null) \
+#        -out $CLIENT_PATH/$CLIENT.crt
 #
+#openssl x509 -in $CLIENT_PATH/$CLIENT.crt -out $CLIENT_PATH/$CLIENT.pem -outform PEM
+
+keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+        -keystore $CLIENT_PATH/$CLIENT.truststore.jks \
+        -alias internal_ca_root \
+        -storepass $TRUSTSTORE_PASSWORD
+
+#keytool -importcert \
+#        -file $CLIENT_PATH/$CLIENT.pem \
+#        -keystore $CLIENT_PATH/$CLIENT.truststore.jks \
+#        -alias keycloak_local \
+#        -storepass pass:qwerty \
+#        -storetype jks
+
 ## Generate a server private key
 #openssl genrsa -out $CLIENT_PATH/$CLIENT.key.pem 2048
 #
@@ -59,7 +79,7 @@ JKS_PASSWORD=asdfgh
 #       -passout pass:qwerty \
 #       -name https-client
 #
-## Generating keyStore for connection with browser as a server
+## Generating keyStore made for browser to connect a client (as a server for browser)
 #keytool -importkeystore \
 #       -srckeystore $CLIENT_PATH/$CLIENT.p12 \
 #       -srcstorepass $P12_PASSWORD \
@@ -83,9 +103,33 @@ JKS_PASSWORD=asdfgh
 #keytool -list -v -keystore $CLIENT_PATH/$CLIENT.jks \
 #        -storepass pass:$JKS_PASSWORD \
 #        -alias rootca
+#
+##keytool -import -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+##        -keystore $CLIENT_PATH/$CLIENT.truststore.jks \
+##        -alias rootca \
+##        -storepass pass:$JKS_PASSWORD \
+##        -storetype jks
+#
+#keytool -importcert -v -noprompt -trustcacerts -file ./root/rootCA.cert.crt \
+#        -keystore ./client-java/localhost.client.truststore.jks \
+#        -alias rootca \
+#        -storepass pass:qwerty \
+#        -storetype jks
+#
+#keytool -importcert -alias root_keycloak_sub \
+#        -file keycloak/localhost.keycloak.cer \
+#        -keystore ./client-java/localhost.client.truststore.jks \
+#        -storepass pass:qwerty \
+#        -storetype jks
+#
+## из статьи https://habr.com/ru/company/dbtc/blog/487318/
+#keytool -import -trustcacerts -alias caroot \
+#        -file ./root/rootCA.cert.crt \
+#        -keystore ./client-java/localhost.client.truststore.jks \
+#        -storepass pass:qwerty \
+#        -storetype jks
+#
+## check truststore entries (certificates)
+#keytool -list -v -keystore ./client-java/localhost.client.truststore.jks -storepass pass:qwerty
 
-keytool -import -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
-        -keystore $CLIENT_PATH/$CLIENT.truststore.jks \
-        -alias rootca \
-        -storepass pass:$JKS_PASSWORD \
-        -storetype jks
+cp $CLIENT_PATH/$CLIENT.truststore.jks $RESOURCE_PATH

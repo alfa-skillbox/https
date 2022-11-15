@@ -17,6 +17,7 @@ spring:
 #            user-name-attribute: 'preferred_username'
         registration:
           httpsClient:
+            name: "httpsClient"
             provider: 'keycloak'
             client-id: 'https-client'
             client-secret: 'CeCdMsVRRWjUKobxGtvH1mnc0PR08esW'
@@ -31,19 +32,12 @@ spring:
 #          jwkSetUri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/certs'
 logging:
   level:
-    org.springframework: DEBUG
+    org.springframework: INFO
 
-feign:
+rest:
   client:
-    config:
-      rest-json-validation:
-        connectTimeout: 2000
-        readTimeout: 2000
-  clients:
-    rest-json-validation:
-      retryer:
-        period: 1000
-        maxPeriod: 1000
-      name: 'rest-json-validation'
-      url: 'https://assertible.com'
-      path: 'json'
+    httpsServer:
+      url: 'https://localhost:8080/json'
+      path:
+        save: '/save'
+        find: '/find'
