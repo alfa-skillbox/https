@@ -1,6 +1,5 @@
 package ru.alfabank.skillbox.examples.https.server.config;
 
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 
 @FunctionalInterface

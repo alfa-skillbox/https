@@ -1,10 +1,8 @@
 package ru.alfabank.skillbox.examples.https.server.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.alfabank.skillbox.examples.https.server.dto.HttpsServerResponse;
 import ru.alfabank.skillbox.examples.https.server.service.HttpsServerClient;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
 @RestController

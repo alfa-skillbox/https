@@ -1,9 +1,9 @@
 package ru.alfabank.skillbox.examples.https.server.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.RequestEntity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,20 +21,11 @@ import java.util.Optional;
 @EnableWebSecurity
 public class HttpsClientWebSecurityConfig {
 
-//    @Bean
-//    public WebSecurity configure(WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers("/actuator/**");
-//        return web;
-//    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // @formatter:off
         http
                 .csrf().disable()
-//                .authorizeRequests()
-//                .anyRequest().authenticated()
-//                .and()
                 .oauth2Client()
                 .and()
                 .sessionManagement()
@@ -80,5 +70,10 @@ public class HttpsClientWebSecurityConfig {
                     .map(OAuth2AuthorizedClient::getAccessToken)
                     .orElse(null);
         };
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().antMatchers("/actuator/**");
     }
 }
