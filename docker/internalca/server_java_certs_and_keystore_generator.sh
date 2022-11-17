@@ -4,22 +4,41 @@ set -ex
 ######################
 # VARS
 ######################
-# Use your own domain name
+# Domain name
 NAME=localhost
 ######################
 ROOT_PATH=./root
 ROOT_CERT_KEY_NAME=rootCA.key.pem
 ROOT_CERT_PEM_NAME=rootCA.cert.pem
-SERVER=$NAME.resource.server
+ROOT_CERT_CRT_NAME=rootCA.cert.crt
+SERVER=$NAME.server
 SERVER_PATH=./server-java
+PATH_TO_COPY=../../https-server/src/main/resources
+SERVER_KEY_PASSWORD=https_server_password
+SERVER_KEYSTORE_PASSWORD=https_server_password
 
-# Generate a server private key
+# Generate a https-server private key
 openssl genrsa -out $SERVER_PATH/$SERVER.key.pem 2048
-
-# Create a certificate-signing request
 openssl req -new -key $SERVER_PATH/$SERVER.key.pem -out $SERVER_PATH/$SERVER.csr \
         -subj "/CN=localhost"
+#keytool -genkeypair -dname "CN=localhost" \
+#      -alias https-server-local \
+#      -keysize 2048 \
+#      -keyalg RSA \
+#      -keypass $SERVER_KEY_PASSWORD \
+#      -keystore $SERVER_PATH/$SERVER.keystore \
+#      -storepass $SERVER_KEYSTORE_PASSWORD \
+#      -validity 825
 
+# Create a certificate-signing request
+#keytool -certreq -dname "CN=localhost" \
+#      -alias https-server-local \
+#      -keystore $SERVER_PATH/$SERVER.keystore \
+#      -storepass $SERVER_KEYSTORE_PASSWORD \
+#      -file $SERVER_PATH/$SERVER.csr
+#openssl genrsa -out $SERVER_PATH/$SERVER.key.pem 2048
+
+# TODO важно понять, на какой ресурс выписывается сертификат ()
 # Create a config file for the extensions
 >$SERVER_PATH/$SERVER.ext cat <<-EOF
 authorityKeyIdentifier=keyid,issuer
@@ -40,24 +59,52 @@ openssl x509 -req \
     -CA $ROOT_PATH/$ROOT_CERT_PEM_NAME \
     -passin pass:qwerty \
     -CAkey $ROOT_PATH/$ROOT_CERT_KEY_NAME \
-    -CAcreateserial -CAserial $SERVER_PATH/$SERVER.srl\
+    -CAcreateserial -CAserial $SERVER_PATH/$SERVER.srl \
     -out $SERVER_PATH/$SERVER.crt \
     -days 825 -sha256 \
     -extfile $SERVER_PATH/$SERVER.ext
-#
+# Import root ca cert
+#keytool -import -keystore $SERVER_PATH/$SERVER.keystore -file root.crt -alias root
+keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+        -keystore $SERVER_PATH/$SERVER.truststore.jks \
+        -alias internal_ca_root \
+        -storepass $SERVER_KEYSTORE_PASSWORD
+# Import root ca cert to keystore
+#keytool -importcert -file $ROOT_PATH/$ROOT_CERT_CRT_NAME \
+#        -keystore $SERVER_PATH/$SERVER.keystore \
+#        -alias https-server-local \
+#        -storepass $SERVER_KEYSTORE_PASSWORD
+# Import certificate signed by ca to keystore
+#keytool -importcert -file $SERVER_PATH/$SERVER.crt \
+#        -keystore $SERVER_PATH/$SERVER.keystore \
+#        -alias https-server-local \
+#        -storepass $SERVER_KEYSTORE_PASSWORD
+
+# Create p12 from key and crt
+
+
 #chmod 655 $NAME.key
 #chmod 655 $NAME.crt
-#
-#openssl pkcs12 \
-#       -inkey $NAME.key \
-#       -in $NAME.crt \
-#       -export -out $NAME.p12 \
-#       -passout pass:qwerty
+
+openssl pkcs12 \
+       -inkey $SERVER_PATH/$SERVER.key.pem \
+       -in $SERVER_PATH/$SERVER.crt \
+       -export -out $SERVER_PATH/$SERVER.p12 \
+       -passout pass:$SERVER_KEYSTORE_PASSWORD
 #
 #keytool -importkeystore \
-#       -srckeystore $NAME.p12 \
-#       -srcstorepass qwerty \
+#       -srckeystore $SERVER_PATH/$SERVER.p12 \
+#       -srcstorepass $SERVER_KEYSTORE_PASSWORD \
 #       -srcstoretype pkcs12 \
-#       -destkeystore $NAME.jks \
+#       -destkeystore $SERVER_PATH/$SERVER.jks \
 #       -deststoretype jks \
-#       -deststorepass qwerty
+#       -deststorepass $SERVER_KEYSTORE_PASSWORD
+#
+#keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+#        -keystore $SERVER_PATH/$SERVER.keystore \
+#        -alias internal_ca_root \
+#        -storepass $SERVER_KEYSTORE_PASSWORD
+
+cp $SERVER_PATH/$SERVER.truststore.jks $PATH_TO_COPY
+#cp $SERVER_PATH/$SERVER.keystore $PATH_TO_COPY
+cp $SERVER_PATH/$SERVER.p12 $PATH_TO_COPY

@@ -50,6 +50,7 @@ public class HttpsServerClient {
         return invoke((token) -> RequestEntity
                 .post(URI.create(url + pathSave))
                 .header(AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(rawJson));
     }

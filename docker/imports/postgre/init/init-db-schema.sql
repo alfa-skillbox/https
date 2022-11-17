@@ -1,25 +1,25 @@
-CREATE SCHEMA IF NOT EXISTS module_tests_schema AUTHORIZATION postgre;
+CREATE SCHEMA IF NOT EXISTS https_server_schema AUTHORIZATION postgre;
 
-GRANT ALL ON SCHEMA module_tests_schema TO postgre;
+GRANT ALL ON SCHEMA https_server_schema TO postgre;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA module_tests_schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA https_server_schema
 GRANT ALL ON TABLES TO postgre WITH GRANT OPTION;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA module_tests_schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA https_server_schema
 GRANT SELECT, USAGE ON SEQUENCES TO postgre WITH GRANT OPTION;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA module_tests_schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA https_server_schema
 GRANT EXECUTE ON FUNCTIONS TO postgre WITH GRANT OPTION;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA module_tests_schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA https_server_schema
 GRANT USAGE ON TYPES TO postgre WITH GRANT OPTION;
 
 -- Table: users
 
-CREATE TABLE IF NOT EXISTS module_tests_schema.jsons (
+CREATE TABLE IF NOT EXISTS https_server_schema.jsons (
   id bigserial NOT NULL UNIQUE PRIMARY KEY,
   json jsonb NOT NULL
 );
 
-ALTER TABLE module_tests_schema.jsons
+ALTER TABLE https_server_schema.jsons
     OWNER to postgre;

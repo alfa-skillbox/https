@@ -13,12 +13,11 @@ ROOT_CERT_PEM_NAME=rootCA.cert.pem
 ROOT_CERT_CRT_NAME=rootCA.cert.crt
 CLIENT=$NAME.client
 CLIENT_PATH=./client-java
-RESOURCE_PATH=../../https-client/src/main/resources
+PATH_TO_COPY=../../https-client/src/main/resources
 ######################
 # Passwords
 ######################
 TRUSTSTORE_PASSWORD=qwerty
-JKS_PASSWORD=asdfgh
 
 #openssl x509 -in <(openssl s_client -showcerts -verify 2 -connect localhost:8443</dev/null) \
 #openssl x509 -in <(openssl s_client -showcerts -verify 2 -connect localhost:8443 < /dev/null) \
@@ -132,4 +131,4 @@ keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
 ## check truststore entries (certificates)
 #keytool -list -v -keystore ./client-java/localhost.client.truststore.jks -storepass pass:qwerty
 
-cp $CLIENT_PATH/$CLIENT.truststore.jks $RESOURCE_PATH
+cp $CLIENT_PATH/$CLIENT.truststore.jks $PATH_TO_COPY

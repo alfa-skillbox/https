@@ -1,6 +1,18 @@
+# TODO
 # VM options -Djavax.net.ssl.trustStore=/Users/aleksandriv/Projects/Alfa/skillbox/https/docker/internalca/client-java/localhost.client.truststore.jks -Djavax.net.ssl.trustStorePassword=asdfgh -Djavax.net.ssl.trustStoreType=JKS -Djavax.net.debug=SSL,handshake
 spring:
   application:
     name: alfa-skillbox-https-client
   profiles:
     active: local
+# Подписи взял у Baeldung
+# enable/disable https
+#server.ssl.enabled: false
+# SSL protocol to use
+#server.ssl.protocol: TLS
+# Enabled SSL protocols
+#server.ssl.enabled-protocols: TLSv1.2
+#trust store location
+#server.ssl.trust-store: classpath:localhost.client.truststore.jks
+#trust store password
+#server.ssl.trust-store-password: qwerty
