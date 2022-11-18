@@ -16,7 +16,7 @@ server.ssl.key-store-type: JKS
 #server.ssl.key-store: classpath:localhost.server.keystore
 server.ssl.key-store: classpath:localhost.server.keystore.jks
 # keystore password
-server.ssl.key-store-password: https_server_password
+server.ssl.key-store-password: serverpass
 # SSL protocol to use
 server.ssl.protocol: TLS
 # Enabled SSL protocols
@@ -25,5 +25,5 @@ server.ssl.enabled-protocols: TLSv1.2
 server.ssl.trust-store: classpath:localhost.server.truststore.jks
 #server.ssl.trust-store: classpath:localhost.server.truststore.p12
 #trust store password
-server.ssl.trust-store-password: https_server_password
+server.ssl.trust-store-password: qwerty
 server.ssl.trust-store-type: JKS

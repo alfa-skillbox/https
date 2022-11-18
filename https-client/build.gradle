@@ -18,10 +18,10 @@ configurations {
 repositories {
     mavenCentral()
 }
-
+// -Djavax.net.ssl.trustStore=/Users/aleksandriv/Projects/Alfa/skillbox/https/docker/internalca/client-java/localhost.client.truststore.jks -Djavax.net.ssl.trustStorePassword=serverpass -Djavax.net.ssl.trustStoreType=JKS -Djavax.net.debug=all -Djava.security.debug=access:stack
 bootRun {
     jvmArgs = ["-Djavax.net.ssl.trustStore=$path_to_client_truststore/localhost.client.truststore.jks",
-            "-Djavax.net.ssl.trustStorePassword=qwerty",
+            "-Djavax.net.ssl.trustStorePassword=$client_truststore_password",
             "-Djavax.net.ssl.trustStoreType=JKS",
             "-Djavax.net.debug=all"]
 }

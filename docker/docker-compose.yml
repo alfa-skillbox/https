@@ -7,11 +7,11 @@ services:
             KEYCLOAK_USER: 'admin'
             KEYCLOAK_PASSWORD: 'admin'
             DB_VENDOR: 'h2'
-            SERVER_KEYSTORE_PASSWORD: 'qwerty'
+            SERVER_KEYSTORE_PASSWORD: 'keycloak_password'
 #            PROXY_ADDRESS_FORWARDING: 'true'
             KEYCLOAK_IMPORT: "/tmp/example-realm.json"
         volumes:
-            - ./imports/keycloak/localhost.keycloak.crt:/etc/x509/https/tls.crt
+            - ./imports/keycloak/localhost.keycloak.p12.crt:/etc/x509/https/tls.crt
             - ./imports/keycloak/localhost.keycloak.key.pem:/etc/x509/https/tls.key
             - ./imports/keycloak/realm-config.json:/tmp/example-realm.json
         ports:

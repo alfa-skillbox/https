@@ -17,7 +17,7 @@ PATH_TO_COPY=../../https-client/src/main/resources
 ######################
 # Passwords
 ######################
-TRUSTSTORE_PASSWORD=qwerty
+TRUSTSTORE_PASSWORD=serverpass
 
 #openssl x509 -in <(openssl s_client -showcerts -verify 2 -connect localhost:8443</dev/null) \
 #openssl x509 -in <(openssl s_client -showcerts -verify 2 -connect localhost:8443 < /dev/null) \
