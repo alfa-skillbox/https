@@ -17,13 +17,13 @@ configurations {
 }
 
 bootRun {
-    jvmArgs = ["-Djavax.net.ssl.trustStore=$path_to_server_keystore/localhost.server.keystore",
+    jvmArgs = ["-Djavax.net.ssl.trustStore=$path_to_server_keystore/localhost.server.truststore.jks",
                "-Djavax.net.ssl.trustStorePassword=$server_keystore_password",
                "-Djavax.net.ssl.trustStoreType=JKS",
-               "-Djavax.net.ssl.keyStore=$path_to_server_keystore/localhost.server.keystore",
+               "-Djavax.net.ssl.keyStore=$path_to_server_keystore/localhost.server.keystore.jks",
                "-Djavax.net.ssl.keyStorePassword=$server_keystore_password",
                "-Djavax.net.ssl.keyStoreType=JKS",
-               "-Djavax.net.debug=all"]
+               "-Djavax.net.debug=SSH:trustmanager"]
 }
 
 repositories {

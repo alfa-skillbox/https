@@ -22,8 +22,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${keycloak.uri}/auth/realms/alfa-skillbox-https"
-          check-token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token/introspect'
+#          issuer-uri: "${keycloak.uri}/auth/realms/alfa-skillbox-https"
+#          check-token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token/introspect'
+          jwk-set-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/certs'
 logging:
   level:
     org.springfaramework: DEBUG

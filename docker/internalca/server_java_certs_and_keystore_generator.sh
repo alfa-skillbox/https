@@ -16,13 +16,14 @@ SERVER_PATH=./server-java
 PATH_TO_COPY=../../https-server/src/main/resources
 SERVER_KEY_PASSWORD=https_server_password
 SERVER_KEYSTORE_PASSWORD=https_server_password
+SERVER_TRUSTSTORE_PASSWORD=https_server_password
 
 # Generate a https-server private key
 openssl genrsa -out $SERVER_PATH/$SERVER.key.pem 2048
 openssl req -new -key $SERVER_PATH/$SERVER.key.pem -out $SERVER_PATH/$SERVER.csr \
         -subj "/CN=localhost"
 #keytool -genkeypair -dname "CN=localhost" \
-#      -alias https-server-local \
+#      -alias server-local \
 #      -keysize 2048 \
 #      -keyalg RSA \
 #      -keypass $SERVER_KEY_PASSWORD \
@@ -43,8 +44,8 @@ openssl req -new -key $SERVER_PATH/$SERVER.key.pem -out $SERVER_PATH/$SERVER.csr
 >$SERVER_PATH/$SERVER.ext cat <<-EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
-extendedKeyUsage=serverAuth,clientAuth
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage=serverAuth
+keyUsage = digitalSignature, nonRepudiation, dataEncipherment
 subjectAltName = @alt_names
 
 [alt_names]
@@ -65,10 +66,20 @@ openssl x509 -req \
     -extfile $SERVER_PATH/$SERVER.ext
 # Import root ca cert
 #keytool -import -keystore $SERVER_PATH/$SERVER.keystore -file root.crt -alias root
-keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+keytool -importcert -trustcacerts -file $ROOT_PATH/$ROOT_CERT_CRT_NAME \
         -keystore $SERVER_PATH/$SERVER.truststore.jks \
         -alias internal_ca_root \
-        -storepass $SERVER_KEYSTORE_PASSWORD
+        -storepass $SERVER_TRUSTSTORE_PASSWORD \
+        -storetype JKS
+keytool -importkeystore \
+      -srckeystore $SERVER_PATH/$SERVER.truststore.jks \
+      -srcstorepass $SERVER_TRUSTSTORE_PASSWORD \
+      -destkeystore $SERVER_PATH/$SERVER.truststore.p12 \
+      -deststoretype PKCS12 \
+      -srcalias internal_ca_root \
+      -deststorepass $SERVER_TRUSTSTORE_PASSWORD
+
+#      -destkeypass qwerty
 # Import root ca cert to keystore
 #keytool -importcert -file $ROOT_PATH/$ROOT_CERT_CRT_NAME \
 #        -keystore $SERVER_PATH/$SERVER.keystore \
@@ -85,20 +96,29 @@ keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
 
 #chmod 655 $NAME.key
 #chmod 655 $NAME.crt
-
+# server.key + server.crt -> keystore.p12
 openssl pkcs12 \
        -inkey $SERVER_PATH/$SERVER.key.pem \
        -in $SERVER_PATH/$SERVER.crt \
-       -export -out $SERVER_PATH/$SERVER.p12 \
-       -passout pass:$SERVER_KEYSTORE_PASSWORD
-#
-#keytool -importkeystore \
-#       -srckeystore $SERVER_PATH/$SERVER.p12 \
-#       -srcstorepass $SERVER_KEYSTORE_PASSWORD \
-#       -srcstoretype pkcs12 \
-#       -destkeystore $SERVER_PATH/$SERVER.jks \
-#       -deststoretype jks \
-#       -deststorepass $SERVER_KEYSTORE_PASSWORD
+       -export -out $SERVER_PATH/$SERVER.keystore.p12 \
+       -passout pass:$SERVER_KEYSTORE_PASSWORD \
+       -name server_local
+# trust.p12 -> trust.jks
+keytool -importkeystore \
+       -srckeystore $SERVER_PATH/$SERVER.keystore.p12 \
+       -srcstorepass $SERVER_KEYSTORE_PASSWORD \
+       -srcstoretype pkcs12 \
+       -srcalias server_local \
+       -destkeystore $SERVER_PATH/$SERVER.keystore.jks \
+       -deststoretype jks \
+       -destalias server_local \
+       -deststorepass $SERVER_KEYSTORE_PASSWORD
+# ca.pem -> trust.jks
+#keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+#        -keystore $SERVER_PATH/$SERVER.keystore.jks \
+#        -alias server_local \
+#        -storepass $SERVER_TRUSTSTORE_PASSWORD \
+#        -storetype JKS
 #
 #keytool -importcert -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
 #        -keystore $SERVER_PATH/$SERVER.keystore \
@@ -106,5 +126,7 @@ openssl pkcs12 \
 #        -storepass $SERVER_KEYSTORE_PASSWORD
 
 cp $SERVER_PATH/$SERVER.truststore.jks $PATH_TO_COPY
+cp $SERVER_PATH/$SERVER.truststore.p12 $PATH_TO_COPY
 #cp $SERVER_PATH/$SERVER.keystore $PATH_TO_COPY
-cp $SERVER_PATH/$SERVER.p12 $PATH_TO_COPY
+cp $SERVER_PATH/$SERVER.keystore.p12 $PATH_TO_COPY
+cp $SERVER_PATH/$SERVER.keystore.jks $PATH_TO_COPY
