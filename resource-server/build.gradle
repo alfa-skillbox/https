@@ -7,6 +7,10 @@ plugins {
     id "com.dorongold.task-tree" version "2.1.0"
 }
 
+group = 'ru.alfabank.skillbox.examples'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = targetCompatibility = '11'
+
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import org.apache.commons.lang3.StringUtils
 
@@ -15,7 +19,7 @@ import static com.bmuschko.gradle.docker.DockerConventionJvmApplicationPlugin.DO
 docker {
     springBootApplication {
         baseImage = 'eclipse-temurin:17-jdk-alpine'
-        jvmArgs = ['-Xmx2048m', 'JAVA_OPTS']
+        jvmArgs = ['-Xmx2048m', '$JAVA_OPTS']
     }
 }
 // Меняем форму ENTRYPOINT из exec в shell, чтобы прокинуть переменную JAVA_OPTS.
@@ -37,9 +41,6 @@ repositories {
     mavenCentral()
 }
 
-group = 'ru.alfabank.skillbox.examples'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
 
 configurations {
     compileOnly {

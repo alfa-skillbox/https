@@ -148,8 +148,8 @@ keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -trustcacerts \
 #      -destkeypass $KEYCLOAK_KEY_PASSWORD
 
 ## step 2 - export private key using openssl
-openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nocerts -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
-openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nokeys -out $KEYCLOAK_PATH/$KEYCLOAK.crt -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
+openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.keystore -noenc -nocerts -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
+openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.keystore -noenc -nokeys -out $KEYCLOAK_PATH/$KEYCLOAK.crt -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
 
 ########################################
 # Copies result to docker import

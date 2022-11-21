@@ -9,9 +9,11 @@ DN=host.docker.internal
 ###########################
 #--- INTERNAL ROOT CA VARS
 ###########################
+ROOT=rootCA
 ROOT_PATH=./root
-ROOT_PASSWORD=rootpass
-ROOT_CERT_PEM_NAME=rootCA.cert.pem
+ROOT_PASSWORD=$ROOT-password
+ROOT_KEYSTORE_ALIAS=root-ca
+ROOT_CERT_PEM_NAME=$ROOT.cert.pem
 ###########################
 #--- RESOURCE SERVER VARS
 ###########################
@@ -44,18 +46,19 @@ PATH_TO_COPY=../imports/$SERVER
 
 # 1.####################################
 # Generate keypair (private + public keys)
-# Input: keystore, alias
+# Input: keystore info
 # Command: genkeypair
-# Output: jks file with keypair
+# Output: .jks file with keypair
 ########################################
-keytool -genkeypair -dname "CN=$SERVER" \
+keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks \
+        -storepass $SERVER_KEYSTORE_PASSWORD \
+        -keypass $SERVER_KEY_PASSWORD \
         -alias $SERVER_KEYSTORE_ALIAS \
+        -dname "CN=$SERVER" \
         -keysize 2048 \
         -keyalg RSA \
-        -keypass $SERVER_KEY_PASSWORD \
-        -keystore $SERVER_PATH/$SERVER.keystore.jks \
-        -storepass $SERVER_KEYSTORE_PASSWORD \
-        -validity 825
+        -validity 825 \
+        -genkeypair
 
 # The same with OPENSSL example
 #openssl genrsa -out $SERVER_PATH/$SERVER.key.pem 2048
@@ -66,7 +69,7 @@ keytool -genkeypair -dname "CN=$SERVER" \
 # Command: certreq
 # Output: .csr request file
 ########################################
-keytool -keystore $SERVER_PATH/$SERVER.keystore.jks \
+keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks \
         -storepass $SERVER_KEYSTORE_PASSWORD \
         -alias $SERVER_KEYSTORE_ALIAS \
         -dname "CN=$SERVER" \
@@ -83,13 +86,13 @@ keytool -keystore $SERVER_PATH/$SERVER.keystore.jks \
 # Command: gencert
 # Output: PEM (with -rfc) or DER certificate file
 ########################################
-keytool -storepass $ROOT_PASSWORD \
-        -keystore $ROOT_PATH/rootCA.jks \
-        -alias root_ca \
+keytool -v -keystore $ROOT_PATH/rootCA.jks \
+        -storepass $ROOT_PASSWORD \
+        -alias $ROOT_KEYSTORE_ALIAS \
         -infile $SERVER_PATH/$SERVER.csr \
         -ext ku:c=dig,kE,dE -ext san=dns:$DN -ext EKU=serverAuth,clientAuth \
         -gencert \
-        -rfc > $SERVER_PATH/$SERVER.temp.pem
+        -rfc -outfile $SERVER_PATH/$SERVER.temp.pem
 
 # The same with OPENSSL example
 # Part 1. Create a .ext config file for using in signing process
@@ -135,7 +138,7 @@ cat $ROOT_PATH/$ROOT_CERT_PEM_NAME $SERVER_PATH/$SERVER.temp.pem > $SERVER_PATH/
 # Command: importcert
 # Output: ssl-server keyStore .jks updated with chain .pem cert
 ########################################
-keytool -keystore $SERVER_PATH/$SERVER.keystore.jks -trustcacerts \
+keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks -trustcacerts \
         -storepass $SERVER_KEYSTORE_PASSWORD \
         -alias $SERVER_KEYSTORE_ALIAS \
         -file $SERVER_PATH/$SERVER.pem \
@@ -159,11 +162,11 @@ keytool -list -v -keystore $SERVER_PATH/$SERVER.keystore.jks -alias $SERVER_KEYS
 # Command: import (or importcert)
 # Output: new truststore .jks file with CA .pem cert
 ########################################
-keytool -keystore $SERVER_PATH/$SERVER.truststore.jks \
+keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
         -storepass $SERVER_TRUSTSTORE_PASSWORD \
         -alias $SERVER_TRUSTSTORE_ALIAS \
         -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
-        -import -trustcacerts \
+        -import -trustcacerts
 
 # 2 Optional ###########################
 # Imports jdk's public CA certs (from cacerts keystore) inside our truststore.jks

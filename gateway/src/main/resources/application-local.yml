@@ -1,6 +1,6 @@
-keycloak.uri: 'https://localhost:8443'
-server:
-  port: 9090
+host: 'host.docker.internal'
+# This is keycloak from docker-compose.yml
+keycloak.uri: 'https://${host}:8443'
 spring:
   security:
     oauth2:
@@ -23,7 +23,7 @@ logging:
 rest:
   client:
     httpsServer:
-      url: 'https://localhost:8080/json'
+      url: 'https://${host}:8080/json'
       path:
         save: '/save'
         find: '/find'

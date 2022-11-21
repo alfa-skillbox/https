@@ -28,18 +28,15 @@ services:
       KEYSTORE_PATH: '/etc/https/keystore.jks'
       KEYSTORE_PASSWORD: 'resource-server-password'
       KEYSTORE_TYPE: 'JKS'
-      TRUSTSTORE_PATH: '/etc/https/truststore.jks'
-      TRUSTSTORE_PASSWORD: 'resource-server-password'
-      TRUSTSTORE_TYPE: 'JKS'
       SPRING_PROFILES_ACIVE: local
       JAVA_OPTS: "
-            -Djavax.net.ssl.trustStore=$TRUSTSTORE_PATH
-            -Djavax.net.ssl.trustStorePassword=$TRUSTSTORE_PASSWORD
-            -Djavax.net.ssl.trustStoreType=$TRUSTSTORE_TYPE
+            -Djavax.net.ssl.trustStore=/etc/https/truststore.jks
+            -Djavax.net.ssl.trustStorePassword=resource-server-password
+            -Djavax.net.ssl.trustStoreType=JKS
             -Djavax.net.debug=all"
     volumes:
-      - ./imports/https-server/truststore.jks:/etc/https/truststore.jks
-      - ./imports/https-server/keystore.jks:/etc/https/keystore.jks
+      - ./imports/resource-server/truststore.jks:/etc/https/truststore.jks
+      - ./imports/resource-server/keystore.jks:/etc/https/keystore.jks
     ports:
       - "8080:8080"
 
@@ -49,17 +46,14 @@ services:
     networks:
       - common
     environment:
-      TRUSTSTORE_PATH: '/etc/https/truststore.jks'
-      TRUSTSTORE_PASSWORD: 'resource-server-password'
-      TRUSTSTORE_TYPE: 'JKS'
       SPRING_PROFILES_ACIVE: local
       JAVA_OPTS: "
-            -Djavax.net.ssl.trustStore=$TRUSTSTORE_PATH
-            -Djavax.net.ssl.trustStorePassword=$TRUSTSTORE_PASSWORD
-            -Djavax.net.ssl.trustStoreType=$TRUSTSTORE_TYPE
+            -Djavax.net.ssl.trustStore=/etc/https/truststore.jks
+            -Djavax.net.ssl.trustStorePassword=gateway-password
+            -Djavax.net.ssl.trustStoreType=JKS
             -Djavax.net.debug=all"
     volumes:
-      - ./imports/https-server/truststore.jks:/etc/https/truststore.jks
+      - ./imports/gateway/truststore.jks:/etc/https/truststore.jks
     ports:
       - "8082:8080"
 
