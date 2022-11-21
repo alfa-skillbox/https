@@ -1,0 +1,29 @@
+keycloak.uri: 'https://localhost:8443'
+server:
+  port: 9090
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            check-token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token/introspect'
+            token-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token'
+        registration:
+          gateway:
+            name: "gateway"
+            provider: 'keycloak'
+            client-id: 'gateway'
+            client-secret: 'CeCdMsVRRWjUKobxGtvH1mnc0PR08esW'
+            authorization-grant-type: 'client_credentials'
+logging:
+  level:
+    org.springframework: INFO
+
+rest:
+  client:
+    httpsServer:
+      url: 'https://localhost:8080/json'
+      path:
+        save: '/save'
+        find: '/find'

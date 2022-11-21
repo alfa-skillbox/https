@@ -1,0 +1,71 @@
+host: 'host.docker.internal'
+# This is keycloak from docker-compose.yml
+keycloak.uri: 'https://${host}:8443'
+
+# Конфигурация SSL через Spring properties
+# Для кастомной конфигурации SSL см. https://habr.com/ru/company/dbtc/blog/487318/
+# enable/disable https
+server.ssl.enabled: true
+# keystore format
+server.ssl.keyStoreType: ${KEYSTORE_TYPE}
+# keystore location
+server.ssl.keyStore: ${KEYSTORE_PATH}
+# keystore password
+server.ssl.keyStorePassword: ${KEYSTORE_PASSWORD}
+# SSL protocol to use
+server.ssl.protocol: TLS
+# Enabled SSL protocols
+server.ssl.enabledProtocols: TLSv1.2
+#trust store location
+#server.ssl.trustStore: classpath:localhost.server.truststore.jks
+#trust store password
+#server.ssl.trustStorePassword: qwerty
+#trust store format
+#server.ssl.trustStoreType: JKS
+
+spring:
+  datasource:
+    name: "alfa-skillbox-https-resource-server"
+    url: "jdbc:postgresql://${host}:5432/alfa_skillbox_https_resource_server_db"
+    username: 'postgre'
+    password: 'postgre'
+    driver-class-name: 'org.postgresql.Driver'
+  jpa:
+    hibernate.ddl-auto: validate
+    show-sql: true
+    generate-ddl: false
+    properties:
+      hibernate.dialect: 'org.hibernate.dialect.PostgreSQL95Dialect'
+      hibernate.current_session_context_class: 'org.springframework.orm.hibernate5.SpringSessionContext'
+      hibernate.connection.characterEncoding: "UTF-8"
+      hibernate.connection.charSet: "UTF-8"
+      hibernate.temp.use_jdbc_metadata_defaults: "true"
+      hibernate.physical_naming_strategy: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
+# Keycloak interaction properties
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: '${keycloak.uri}/auth/realms/alfa-skillbox-https/protocol/openid-connect/certs'
+logging:
+  level:
+    org.springfaramework: DEBUG
+    org.springfaramework.orm.jpa.JpaTransactionManager: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.desriptor.sql.BasicBinder: TRACE
+
+# External json validation service properties
+feign:
+  client:
+    config:
+      rest-json-validation:
+        connectTimeout: 2000
+        readTimeout: 2000
+  clients:
+    rest-json-validation:
+      retryer:
+        period: 1000
+        maxPeriod: 1000
+      name: 'rest-json-validation'
+      url: 'https://assertible.com'
+      path: 'json'

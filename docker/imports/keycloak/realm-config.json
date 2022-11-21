@@ -3,7 +3,7 @@
   "enabled": true,
   "clients": [
     {
-      "clientId" : "https-client",
+      "clientId" : "gateway",
       "rootUrl" : "http://localhost:8443",
       "baseUrl" : "http://localhost:8443/*",
       "surrogateAuthRequired" : false,
@@ -28,7 +28,7 @@
         "saml.force.post.binding" : "false",
         "saml.multivalued.roles" : "false",
         "oauth2.device.authorization.grant.enabled" : "false",
-        "use.jwks.url" : "false",
+        "use.jwks.url" : "true",
         "backchannel.logout.revoke.offline.tokens" : "false",
         "saml.server.signature.keyinfo.ext" : "false",
         "use.refresh.tokens" : "false",

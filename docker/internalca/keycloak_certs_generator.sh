@@ -1,139 +1,166 @@
 #!/usr/bin/env bash
 set -ex
 
-######################
-# VARS
-######################
-# Use your own domain name
-NAME=localhost
-######################
-KEYCLOAK=$NAME.keycloak
-KEYCLOAK_PATH=./keycloak
-KEYCLOAK_KEY_PASSWORD=keycloak_password
-KEYCLOAK_STORE_PASSWORD=keycloak_password
-KEYCLOAK_IMPORT_PATH=../imports/keycloak
-ROOT_PASSWORD=rootpass
+###########################
+#- VARS
+###########################
+#--- Domain name
+DN=host.docker.internal
+###########################
+#--- INTERNAL ROOT CA VARS
+###########################
+ROOT=rootCA
 ROOT_PATH=./root
-ROOT_CERT_KEY_NAME=rootCA.key.pem
-ROOT_CERT_PEM_NAME=rootCA.cert.pem
+ROOT_PASSWORD=$ROOT-password
+ROOT_KEYSTORE_ALIAS=root-ca
+ROOT_CERT_PEM_NAME=$ROOT.cert.pem
+###########################
+#--- RESOURCE SERVER VARS
+###########################
+KEYCLOAK=keycloak
+KEYCLOAK_PATH=./keycloak
+KEYCLOAK_KEY_PASSWORD=keycloak-password
+KEYCLOAK_KEYSTORE_PASSWORD=keycloak-password
+KEYCLOAK_KEYSTORE_ALIAS=keycloak-local
+###########################
+#--- DOCKER IMPORT VARS
+###########################
+PATH_TO_COPY=../imports/$KEYCLOAK
 
-# Generate keycloak private and public key pair
-#openssl genrsa -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem 2048
 
-# Generate keycloak private key
-#keytool -genseckey -dname "CN=localhost" \
-#      -alias keycloak_local \
-#      -keysize 56 \
-#      -keyalg DES \
-#      -keypass $KEYCLOAK_KEY_PASSWORD \
-#      -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-#      -storepass $KEYCLOAK_STORE_PASSWORD \
-#      -validity 825
-keytool -genkeypair -dname "CN=localhost" \
-      -alias keycloak_local \
-      -keysize 2048 \
-      -keyalg RSA \
-      -keypass $KEYCLOAK_KEY_PASSWORD \
-      -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-      -storepass $KEYCLOAK_STORE_PASSWORD \
-      -validity 825
-# Create a certificate-signing request
-keytool -certreq -dname "CN=localhost" \
-      -alias keycloak_local \
-      -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-      -storepass $KEYCLOAK_STORE_PASSWORD \
-      -file $KEYCLOAK_PATH/$KEYCLOAK.csr
-#keytool -certreq -alias localhost -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore > $KEYCLOAK_PATH/$KEYCLOAK.csr
 
-# Create a certificate-signing request
-#openssl req -new -key $KEYCLOAK_PATH/$KEYCLOAK.key.pem -out $KEYCLOAK_PATH/$KEYCLOAK.csr \
-#        -subj "/CN=keycloak_local"
-#keytool -certreq -alias keycloak_pair \
-#        -storepass $KEYCLOAK_STORE_PASSWORD \
-#        -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-#        -file $KEYCLOAK_PATH/$KEYCLOAK.csr
+#--------------------------------------Keycloak (as SSL-SERVER) KeyStore---------------------------------------#
+# TODO 1 keypair .jks (генерим ключи SSL сервера)
+#             ->
+#               2 .csr (создаем запрос на получение с)
+#                     ->
+#                       3 server .pem certificate (signed by CA)
+#                                                               ->
+#                                                                 4 CA .pem + server .pem = chain .pem
+#                                                                                         ->
+#                                                                                           5 Update keypair jks with chain .pem
 
-# Create a config file for the extensions
-#>$KEYCLOAK_PATH/$KEYCLOAK.ext cat <<-EOF
-#authorityKeyIdentifier=keyid,issuer
-#basicConstraints=CA:FALSE
-#extendedKeyUsage=serverAuth,clientAuth
-#keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-#subjectAltName = @alt_names
-#
-#[alt_names]
-#DNS.1 = $NAME # Be sure to include the domain name here because Common Name is not so commonly honoured by itself
-## DNS.2 = $KEYCLOAK.$NAME # Optionally, add additional domains (I've added a subdomain here)
-#IP.1 = 127.0.0.1 # Optionally, add an IP address (if the connection which you have planned requires it)
-#EOF
-
-# Create the signed server certificate TODO доработать
-keytool -v -storepass $KEYCLOAK_STORE_PASSWORD \
-        -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-        -certreq \
-        -alias keycloak_local \
-        -file $KEYCLOAK_PATH/$KEYCLOAK.csr
-keytool -v -storepass $ROOT_PASSWORD \
-        -keystore $ROOT_PATH/rootCA.jks \
-        -infile $KEYCLOAK_PATH/$KEYCLOAK.csr \
-        -gencert \
-        -alias root_ca \
-        -ext ku:c=dig,kE,dE -ext san=dns:localhost -ext EKU=serverAuth,clientAuth \
-        -rfc -outfile $KEYCLOAK_PATH/$KEYCLOAK.temp.pem
-#         & cat $KEYCLOAK_PATH/$KEYCLOAK.temp.pem
-
-cat $ROOT_PATH/$ROOT_CERT_PEM_NAME $KEYCLOAK_PATH/$KEYCLOAK.temp.pem > $KEYCLOAK_PATH/$KEYCLOAK.pem
-#cat $KEYCLOAK_PATH/$KEYCLOAK.temp.pem > $KEYCLOAK_PATH/$KEYCLOAK.pem
-#
-keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -trustcacerts \
-        -importcert \
-        -alias keycloak_local \
-        -storepass $KEYCLOAK_STORE_PASSWORD \
-        -file $KEYCLOAK_PATH/$KEYCLOAK.pem
-
+# 1.####################################
+# Generates keypair (private + public keys)
+# Input: keystore info
+# Command: genkeypair
+# Output: keystore file with keypair
+########################################
 keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-        -storepass $KEYCLOAK_STORE_PASSWORD \
-        -alias keycloak_local \
-        -exportcert \
-        -rfc -file $KEYCLOAK_PATH/$KEYCLOAK.crt.pem
+        -storepass $KEYCLOAK_KEYSTORE_PASSWORD \
+        -alias $KEYCLOAK_KEYSTORE_ALIAS \
+        -storetype PKCS12 \
+        -dname "CN=$KEYCLOAK" \
+        -keysize 2048 \
+        -keyalg RSA \
+        -keypass $KEYCLOAK_KEY_PASSWORD \
+        -validity 825 \
+        -genkeypair
 
-keytool -printcert -file $KEYCLOAK_PATH/$KEYCLOAK.crt.pem
-openssl x509 -outform pem -in $KEYCLOAK_PATH/$KEYCLOAK.crt.pem -out $KEYCLOAK_PATH/$KEYCLOAK.crt
-#        $ echo "$KEYCLOAK_PATH/$KEYCLOAK.crt ready"
-#openssl x509 -req \
-#    -in $KEYCLOAK_PATH/$KEYCLOAK.csr \
-#    -CA $ROOT_PATH/$ROOT_CERT_PEM_NAME \
-#    -passin pass:qwerty \
-#    -CAkey $ROOT_PATH/$ROOT_CERT_KEY_NAME \
-#    -CAcreateserial -CAserial $KEYCLOAK_PATH/$KEYCLOAK.srl\
-#    -out $KEYCLOAK_PATH/$KEYCLOAK.crt \
-#    -days 825 -sha256 \
-#    -extfile $KEYCLOAK_PATH/$KEYCLOAK.ext
+# 2.####################################
+# Generates a certificate-signing request
+# Input: keypair keystore and alias
+# Command: certreq
+# Output: .csr request file
+########################################
+keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+        -storepass $KEYCLOAK_KEYSTORE_PASSWORD \
+        -alias $KEYCLOAK_KEYSTORE_ALIAS \
+        -dname "CN=$KEYCLOAK" \
+        -certreq \
+        -file $KEYCLOAK_PATH/$KEYCLOAK.csr \
 
-#check cert chain
-keytool -list -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -alias keycloak_local -storepass $KEYCLOAK_STORE_PASSWORD
+# 3.####################################
+# Signs certificate with Root CA
+# Input: root ca keystore and his alias, .csr request,
+#        extension params
+# Command: gencert
+# Output: PEM (with -rfc) or DER certificate file
+########################################
+keytool -v -keystore $ROOT_PATH/$ROOT.jks \
+        -storepass $ROOT_PASSWORD \
+        -alias $ROOT_KEYSTORE_ALIAS \
+        -infile $KEYCLOAK_PATH/$KEYCLOAK.csr \
+        -ext ku:c=dig,kE,dE -ext san=dns:$DN -ext EKU=serverAuth,clientAuth \
+        -gencert \
+        -rfc -outfile $KEYCLOAK_PATH/$KEYCLOAK.temp.pem
 
-## export private key from keycloak keystore
+# 4.####################################
+# Combines Root CA certificate with SSL-Server certificate
+# WARN! Root cert should be on the first position
+# Input: Root CA .pem file, ssl-server .pem file
+# Command: cat
+# Output: chained (combined) ssl-server .pem cert
+########################################
+cat $ROOT_PATH/$ROOT_CERT_PEM_NAME $KEYCLOAK_PATH/$KEYCLOAK.temp.pem > $KEYCLOAK_PATH/$KEYCLOAK.pem
+
+# 5.####################################
+# Updates keypair keystore with chained .pem cert
+# Input: keypair keystore and alias, chained .pem cert
+# Command: importcert
+# Output: ssl-server keyStore .jks updated with chained .pem cert
+########################################
+keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -trustcacerts \
+        -storepass $KEYCLOAK_KEYSTORE_PASSWORD \
+        -alias $KEYCLOAK_KEYSTORE_ALIAS \
+        -file $KEYCLOAK_PATH/$KEYCLOAK.pem \
+        -importcert \
+
+# 6.####################################
+# Exports result .pem certificate signed by CA from SSL-server keystore
+# Input: keystore and alias
+# Command: exportcert
+# Output: result chained .pem cert
+########################################
+#keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+#        -storepass $KEYCLOAK_KEYSTORE_PASSWORD \
+#        -alias $KEYCLOAK_KEYSTORE_ALIAS \
+#        -exportcert \
+#        -rfc -file $KEYCLOAK_PATH/$KEYCLOAK.crt.pem
+
+# 7.####################################
+# Converts keypair jks with chain .pem cert
+# Input: keypair keystore and alias, chain .pem cert
+# Command: importcert
+# Output: ssl-server keyStore .jks updated with chain .pem cert
+########################################
+#openssl x509 -outform pem -in $KEYCLOAK_PATH/$KEYCLOAK.crt.pem -out $KEYCLOAK_PATH/$KEYCLOAK.crt
+
+########################################
+#Prints to stdout the contents of the keystore entry identified by alias
+########################################
+#keytool -list -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -storepass $KEYCLOAK_KEYSTORE_PASSWORD -alias $KEYCLOAK_KEYSTORE_ALIAS
+
+# 7.####################################
+# Converts keypair .jks with chain .pem cert
+# Input: keypair keystore and alias, chain .pem cert
+# Command: importcert
+# Output: ssl-server keyStore .jks updated with chain .pem cert
+########################################
 ## step 1 - converting to pkcs12 using keytool
-keytool -importkeystore \
-      -srckeystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-      -srcstorepass $KEYCLOAK_STORE_PASSWORD \
-      -destkeystore $KEYCLOAK_PATH/$KEYCLOAK.p12 \
-      -deststoretype PKCS12 \
-      -srcalias keycloak_local \
-      -deststorepass $KEYCLOAK_STORE_PASSWORD \
-      -destkeypass $KEYCLOAK_KEY_PASSWORD
-#
+#keytool -importkeystore \
+#      -srckeystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
+#      -srcstorepass $KEYCLOAK_KEYSTORE_PASSWORD \
+#      -destkeystore $KEYCLOAK_PATH/$KEYCLOAK.p12 \
+#      -deststoretype PKCS12 \
+#      -srcalias $KEYCLOAK_KEYSTORE_ALIAS \
+#      -deststorepass $KEYCLOAK_KEYSTORE_PASSWORD \
+#      -destkeypass $KEYCLOAK_KEY_PASSWORD
+
 ## step 2 - export private key using openssl
-openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nocerts -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem -password pass:$KEYCLOAK_STORE_PASSWORD
-openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nokeys -out $KEYCLOAK_PATH/$KEYCLOAK.p12.crt -password pass:$KEYCLOAK_STORE_PASSWORD
+openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nocerts -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
+openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.p12 -noenc -nokeys -out $KEYCLOAK_PATH/$KEYCLOAK.crt -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
 
-# copy to keycloak imports directory
-cp $KEYCLOAK_PATH/$KEYCLOAK.key.pem $KEYCLOAK_IMPORT_PATH
-cp $KEYCLOAK_PATH/$KEYCLOAK.crt $KEYCLOAK_IMPORT_PATH
-cp $KEYCLOAK_PATH/$KEYCLOAK.p12.crt $KEYCLOAK_IMPORT_PATH
+########################################
+# Copies result to docker import
+########################################
+cp $KEYCLOAK_PATH/$KEYCLOAK.key.pem $PATH_TO_COPY
+cp $KEYCLOAK_PATH/$KEYCLOAK.crt $PATH_TO_COPY
+#cp $KEYCLOAK_PATH/$KEYCLOAK.p12.crt $PATH_TO_COPY
 
-# change modification to key and crt keycloak files
-chmod 655 $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.key.pem
-chmod 655 $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.crt
-chmod 655 $KEYCLOAK_IMPORT_PATH/$KEYCLOAK.p12.crt
+########################################
+# Changes modification of copied files
+########################################
+chmod 655 $PATH_TO_COPY/$KEYCLOAK.key.pem
+chmod 655 $PATH_TO_COPY/$KEYCLOAK.crt
+#chmod 655 $PATH_TO_COPY/$KEYCLOAK.p12.crt
