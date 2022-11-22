@@ -35,3 +35,11 @@ keytool -keystore $ROOT_PATH/$ROOT.jks \
         -alias $ROOT_KEYSTORE_ALIAS \
         -exportcert \
         -rfc -file $ROOT_PATH/$ROOT_CERT_PEM_NAME
+
+########################################
+# Exports root CA private key
+########################################
+openssl pkcs12 -in $ROOT_PATH/$ROOT.jks \
+        -password pass:$ROOT_KEYSTORE_PASSWORD \
+        -noenc -nocerts \
+        -out $ROOT_PATH/$ROOT.key

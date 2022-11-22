@@ -2,4 +2,4 @@
 set -e
 echo "Starting postgre container"
 docker-compose up --force-recreate --remove-orphans -d postgre
-docker-compose up --force-recreate --remove-orphans -d adminer
+#docker-compose up --force-recreate --remove-orphans -d adminer

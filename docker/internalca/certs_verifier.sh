@@ -5,7 +5,7 @@ set -ex
 # domain name
 NAME=localhost
 ROOT_PATH=./root
-#ROOT_CERT_KEY_NAME=rootCA.key.pem
+#ROOT_CERT_KEY_NAME=root.key.pem
 ROOT_CERT_PEM_NAME=rootCA.cert.pem
 CLIENT=$NAME.client
 CLIENT_PATH=./client-java
