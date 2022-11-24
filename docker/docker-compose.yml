@@ -58,7 +58,7 @@ services:
       - "8082:8080"
 
   postgre:
-    image: 'postgres:12-alpine'
+    image: 'postgres:13.5'
     restart: always
     networks:
       - common
@@ -68,14 +68,17 @@ services:
       -c ssl_key_file=/var/lib/postgresql/server.key
     environment:
       POSTGRES_DB: alfa_skillbox_https_resource_server_db
-      POSTGRES_USER: postgre
-      POSTGRES_PASSWORD: postgre
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - ./imports/postgre/init/init-db-schema.sql:/docker-entrypoint-initdb.d/init-db-schema.sql
+      - ./imports/postgre/init/init_pg_hba.sh:/docker-entrypoint-initdb.d/init_pg_hba.sh
+      - ./imports/postgre/init/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
       - ./data/postgre:/var/lib/postgresql/data
 #  solved postgres using ssl problem with https://stackoverflow.com/questions/55072221/deploying-postgresql-docker-with-ssl-certificate-and-key-with-volumes
-      - ./imports/postgre/server.crt:/var/lib/postgresql/server.crt:ro
-      - ./imports/postgre/server.key:/var/lib/postgresql/server.key:ro
+#      - ./imports/postgre/certs/server.key:/var/lib/postgresql/certs/server.key
+      - ./imports/postgre/certs/server.key:/var/lib/postgresql/server.key
+      - ./imports/postgre/certs/server.crt:/var/lib/postgresql/server.crt
     ports:
       - '5432:5432'
 #  adminer:

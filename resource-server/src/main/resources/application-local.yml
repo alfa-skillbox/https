@@ -26,9 +26,9 @@ server.ssl.enabledProtocols: TLSv1.2
 spring:
   datasource:
     name: "alfa-skillbox-https-resource-server"
-    url: "jdbc:postgresql://${host}:5432/alfa_skillbox_https_resource_server_db"
-    username: 'postgre'
-    password: 'postgre'
+    url: "jdbc:postgresql://${host}:5432/alfa_skillbox_https_resource_server_db?ssl=true&sslmode=require"
+    username: 'postgres'
+    password: 'postgres'
     driver-class-name: 'org.postgresql.Driver'
   jpa:
     hibernate.ddl-auto: validate
