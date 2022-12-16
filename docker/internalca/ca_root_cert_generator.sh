@@ -7,17 +7,19 @@ set -ex
 #--- INTERNAL ROOT CA VARS
 ###########################
 ROOT=rootCA
-ROOT_PATH=./root
+ROOT_PATH=./$ROOT
 ROOT_KEYSTORE_PASSWORD=$ROOT-password
 ROOT_KEYSTORE_ALIAS=root-ca
 ROOT_CERT_PEM_NAME=$ROOT.cert.pem
 ###########################
+mkdir -p $ROOT_PATH
 
 # 1.####################################
-# Generates the private key and self-signet root CA certificate
-# Input: info for new .jks
+# Генерим приватный ключ и самоподписанный сертификат для Root CA
+# Команда genkeypair создает keystore с самоподписанным сертификатом по-умолчанию
+# Input: информация для нового keystore
 # Command: genkeypair
-# Output: new keystore .jks file with self-signet root CA certificate
+# Output: новый keystore .jks файл с самоподписанным сертификатом для Root CA
 ########################################
 keytool -keystore $ROOT_PATH/$ROOT.jks \
         -storepass $ROOT_KEYSTORE_PASSWORD \
@@ -26,6 +28,10 @@ keytool -keystore $ROOT_PATH/$ROOT.jks \
         -ext bc:c \
         -keyalg RSA -validity 825 \
         -genkeypair -v
+
+# ROOT CA with OpenSSL пример
+#openssl genpkey -out $ROOT_PATH/$ROOT.key -algorithm RSA -pkeyopt rsa_keygen_bits:2048
+#openssl req -x509 -new -nodes -key $ROOT_PATH/$ROOT.key -sha256 -days 365 -out $ROOT_PATH/$ROOT.pem -subj /CN=RootCA
 
 ########################################
 # Exports self-signet root CA .pem certificate

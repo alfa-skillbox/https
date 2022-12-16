@@ -5,12 +5,12 @@ set -ex
 #- VARS
 ###########################
 #--- Domain name
-DN=host.docker.internal
+DN=localhost
 ###########################
 #--- INTERNAL ROOT CA VARS
 ###########################
 ROOT=rootCA
-ROOT_PATH=./root
+ROOT_PATH=./$ROOT
 ROOT_PASSWORD=$ROOT-password
 ROOT_KEYSTORE_ALIAS=root-ca
 ROOT_CERT_PEM_NAME=$ROOT.cert.pem
@@ -18,27 +18,29 @@ ROOT_CERT_PEM_NAME=$ROOT.cert.pem
 #--- RESOURCE SERVER VARS
 ###########################
 KEYCLOAK=keycloak
-KEYCLOAK_PATH=./keycloak
-KEYCLOAK_KEY_PASSWORD=keycloak-password
-KEYCLOAK_KEYSTORE_PASSWORD=keycloak-password
-KEYCLOAK_KEYSTORE_ALIAS=keycloak-local
+KEYCLOAK_PATH=./$KEYCLOAK
+KEYCLOAK_KEY_PASSWORD=$KEYCLOAK-password
+KEYCLOAK_KEYSTORE_PASSWORD=$KEYCLOAK-password
+KEYCLOAK_KEYSTORE_ALIAS=$KEYCLOAK-local
 ###########################
 #--- DOCKER IMPORT VARS
 ###########################
 PATH_TO_COPY=../imports/$KEYCLOAK
 
-
+mkdir -p $KEYCLOAK_PATH
 
 #--------------------------------------Keycloak (as SSL-SERVER) KeyStore---------------------------------------#
-# TODO 1 keypair .jks (генерим ключи SSL сервера)
+# 1. Генерим для Keycloak ключи (в виде keystore) SSL сервера
 #             ->
-#               2 .csr (создаем запрос на получение с)
+#               2 .csr (создаем запрос на подписание сертификата в CA)
 #                     ->
-#                       3 server .pem certificate (signed by CA)
-#                                                               ->
-#                                                                 4 CA .pem + server .pem = chain .pem
-#                                                                                         ->
-#                                                                                           5 Update keypair jks with chain .pem
+#                       3 Имитируем подпись сертификата в CA, получаем обратно .pem сертификат
+#                           ->
+#                              4 CA .pem + keycloak .pem = chain .pem
+#                                   ->
+#                                      5 Импортим в keystore с шага 1 chain .pem сертификат
+#                                          ->
+#                                              6 С помощью OpenSSL pkcs12 удобно достаем ключ
 
 # 1.####################################
 # Generates keypair (private + public keys)
@@ -104,50 +106,8 @@ keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -trustcacerts \
         -storepass $KEYCLOAK_KEYSTORE_PASSWORD \
         -alias $KEYCLOAK_KEYSTORE_ALIAS \
         -file $KEYCLOAK_PATH/$KEYCLOAK.pem \
-        -importcert \
+        -importcert
 
-# 6.####################################
-# Exports result .pem certificate signed by CA from SSL-server keystore
-# Input: keystore and alias
-# Command: exportcert
-# Output: result chained .pem cert
-########################################
-#keytool -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-#        -storepass $KEYCLOAK_KEYSTORE_PASSWORD \
-#        -alias $KEYCLOAK_KEYSTORE_ALIAS \
-#        -exportcert \
-#        -rfc -file $KEYCLOAK_PATH/$KEYCLOAK.crt.pem
-
-# 7.####################################
-# Converts keypair jks with chain .pem cert
-# Input: keypair keystore and alias, chain .pem cert
-# Command: importcert
-# Output: ssl-server keyStore .jks updated with chain .pem cert
-########################################
-#openssl x509 -outform pem -in $KEYCLOAK_PATH/$KEYCLOAK.crt.pem -out $KEYCLOAK_PATH/$KEYCLOAK.crt
-
-########################################
-#Prints to stdout the contents of the keystore entry identified by alias
-########################################
-#keytool -list -v -keystore $KEYCLOAK_PATH/$KEYCLOAK.keystore -storepass $KEYCLOAK_KEYSTORE_PASSWORD -alias $KEYCLOAK_KEYSTORE_ALIAS
-
-# 7.####################################
-# Converts keypair .jks with chain .pem cert
-# Input: keypair keystore and alias, chain .pem cert
-# Command: importcert
-# Output: ssl-server keyStore .jks updated with chain .pem cert
-########################################
-## step 1 - converting to pkcs12 using keytool
-#keytool -importkeystore \
-#      -srckeystore $KEYCLOAK_PATH/$KEYCLOAK.keystore \
-#      -srcstorepass $KEYCLOAK_KEYSTORE_PASSWORD \
-#      -destkeystore $KEYCLOAK_PATH/$KEYCLOAK.p12 \
-#      -deststoretype PKCS12 \
-#      -srcalias $KEYCLOAK_KEYSTORE_ALIAS \
-#      -deststorepass $KEYCLOAK_KEYSTORE_PASSWORD \
-#      -destkeypass $KEYCLOAK_KEY_PASSWORD
-
-## step 2 - export private key using openssl
 openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.keystore -noenc -nocerts -out $KEYCLOAK_PATH/$KEYCLOAK.key.pem -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
 openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.keystore -noenc -nokeys -out $KEYCLOAK_PATH/$KEYCLOAK.crt -password pass:$KEYCLOAK_KEYSTORE_PASSWORD
 
@@ -156,11 +116,9 @@ openssl pkcs12 -in $KEYCLOAK_PATH/$KEYCLOAK.keystore -noenc -nokeys -out $KEYCLO
 ########################################
 cp $KEYCLOAK_PATH/$KEYCLOAK.key.pem $PATH_TO_COPY
 cp $KEYCLOAK_PATH/$KEYCLOAK.crt $PATH_TO_COPY
-#cp $KEYCLOAK_PATH/$KEYCLOAK.p12.crt $PATH_TO_COPY
 
 ########################################
 # Changes modification of copied files
 ########################################
 chmod 655 $PATH_TO_COPY/$KEYCLOAK.key.pem
 chmod 655 $PATH_TO_COPY/$KEYCLOAK.crt
-#chmod 655 $PATH_TO_COPY/$KEYCLOAK.p12.crt

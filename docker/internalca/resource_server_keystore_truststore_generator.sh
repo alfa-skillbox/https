@@ -5,12 +5,12 @@ set -ex
 #- VARS
 ###########################
 #--- Domain name
-DN=host.docker.internal
+DN=localhost
 ###########################
 #--- INTERNAL ROOT CA VARS
 ###########################
 ROOT=rootCA
-ROOT_PATH=./root
+ROOT_PATH=./$ROOT
 ROOT_PASSWORD=$ROOT-password
 ROOT_KEYSTORE_ALIAS=root-ca
 ROOT_CERT_PEM_NAME=$ROOT.cert.pem
@@ -27,28 +27,32 @@ SERVER_TRUSTSTORE_PASSWORD=$SERVER-password
 ###########################
 #--- YOUR JDK'S CACERTS VARS
 ###########################
-CACERTS_PATH=~/.sdkman/candidates/java/current/lib/security/cacerts
+# TODO Для успешной работы замените текущий путь на путь к cacerts в своем jdk
+#CACERTS_PATH=~/.sdkman/candidates/java/current/lib/security/cacerts
 ###########################
 #--- DOCKER IMPORT VARS
 ###########################
 PATH_TO_COPY=../imports/$SERVER
 
+mkdir -p $SERVER_PATH
+mkdir -p $PATH_TO_COPY
+
 #--------------------------------------Resource-server (as SSL-SERVER) KeyStore---------------------------------------#
-# 1 keypair .jks (генерим ключи SSL сервера)
-#             ->
-#               2 .csr (создаем запрос на получение с)
-#                     ->
-#                       3 server .pem certificate (signed by CA)
-#                                                               ->
-#                                                                 4 CA .pem + server .pem = chain .pem
-#                                                                                         ->
-#                                                                                           5 Update keypair jks with chain .pem
+# 1 Генерим для Resource-server ключи SSL сервера
+#    ->
+#       2 .csr (создаем запрос на подписание сертификата в CA)
+#          ->
+#             3 Имитируем подпись сертификата в CA, получаем обратно .pem сертификат
+#                ->
+#                   4 CA .pem + server .pem = chain .pem
+#                      ->
+#                         5 Импортим в keystore с шага 1 chain .pem сертификат
 
 # 1.####################################
-# Generate keypair (private + public keys)
-# Input: keystore info
+# Генерим keystore с приватным ключом и самоподписанным сертификатом в алиасе внутри
+# Input: инфо для keystore
 # Command: genkeypair
-# Output: .jks file with keypair
+# Output: .jks keystore файл с приватным ключом и самоподписанным сертификатом в алиасе внутри
 ########################################
 keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks \
         -storepass $SERVER_KEYSTORE_PASSWORD \
@@ -60,8 +64,8 @@ keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks \
         -validity 825 \
         -genkeypair
 
-# The same with OPENSSL example
-#openssl genrsa -out $SERVER_PATH/$SERVER.key.pem 2048
+# Пример генерации приватного ключа через OpenSSL
+#openssl genpkey -out $SERVER_PATH/$SERVER.pkcs8.key -outform PEM -algorithm RSA
 
 # 2.####################################
 # Generate a certificate-signing request
@@ -94,8 +98,10 @@ keytool -v -keystore $ROOT_PATH/rootCA.jks \
         -gencert \
         -rfc -outfile $SERVER_PATH/$SERVER.temp.pem
 
-# The same with OPENSSL example
-# Part 1. Create a .ext config file for using in signing process
+# Пример через OPENSSL
+# Шаг 1. Файл конфигурации .ext для использования в процессе подписания
+# через subjectAltName задается DNS, доступ с которого будет разрешен
+
 #>$SERVER_PATH/$SERVER.ext cat <<-EOF
 #authorityKeyIdentifier=keyid,issuer
 #basicConstraints=CA:FALSE
@@ -109,7 +115,7 @@ keytool -v -keystore $ROOT_PATH/rootCA.jks \
 #IP.1 = 127.0.0.1 # Optionally, add an IP address (if the connection which you have planned requires it)
 #EOF
 
-# Part 2. Sign certificate with Root CA
+# Шаг 2. Имитируем работу с запросом .csr, т.е. подписываем сертификат в Root CA
 #openssl x509 -req \
 #    -in $SERVER_PATH/$SERVER.csr \
 #    -CA $ROOT_PATH/$ROOT_CERT_PEM_NAME \
@@ -119,9 +125,6 @@ keytool -v -keystore $ROOT_PATH/rootCA.jks \
 #    -out $SERVER_PATH/$SERVER.crt \
 #    -days 825 -sha256 \
 #    -extfile $SERVER_PATH/$SERVER.ext
-
-# Part 3. Converting .crt -> .pem
-#openssl x509 -in $SERVER_PATH/$SERVER.crt -out $SERVER_PATH/$SERVER.pem -outform PEM
 
 # 4.####################################
 # Combine Root CA certificate with SSL-Server certificate
@@ -149,18 +152,16 @@ keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks -trustcacerts \
 ########################################
 keytool -list -v -keystore $SERVER_PATH/$SERVER.keystore.jks -alias $SERVER_KEYSTORE_ALIAS -storepass $SERVER_KEYSTORE_PASSWORD
 
-
 #--------------------------------------Resource-server (as SSL-CLIENT) TrustStore-------------------------------------#
-# 1 .jks + CA .pem (создать хранилище SSL клиента, положить туда CA .pem сертификат)
+# 1 Создать truststore SSL-клиента, положить туда Root CA .pem сертификат
 #             ->
 #               2 (Optional) cacerts to .jks (копируем сеертификаты из cacerts)
 
 # 1.####################################
-# Creates server truststore .jks file and
-# imports here CA .pem cert
-# Input: CA .pem cert
+# Создаем truststore файл .jks и импортим в него сертификат Root CA
+# Input: Root CA .pem cert
 # Command: import (or importcert)
-# Output: new truststore .jks file with CA .pem cert
+# Output: новый файл truststore формата JKS с сертификатом Root CA
 ########################################
 keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
         -storepass $SERVER_TRUSTSTORE_PASSWORD \
@@ -175,17 +176,17 @@ keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
 # Command: importkeystore
 # Output: updated SSL-client trustStore .jks
 ########################################
-keytool -srckeystore $CACERTS_PATH \
-        -srcstorepass changeit \
-        -destkeystore $SERVER_PATH/$SERVER.truststore.jks \
-        -deststorepass $SERVER_TRUSTSTORE_PASSWORD \
-        -deststoretype JKS \
-        -importkeystore
+#keytool -srckeystore $CACERTS_PATH \
+#        -srcstorepass changeit \
+#        -destkeystore $SERVER_PATH/$SERVER.truststore.jks \
+#        -deststorepass $SERVER_TRUSTSTORE_PASSWORD \
+#        -deststoretype JKS \
+#        -importkeystore
 
 ########################################
 # Checks certs inside SSL-client trustStore .jks
 ########################################
-keytool -list -v -keystore $SERVER_PATH/$SERVER.truststore.jks -alias $SERVER_TRUSTSTORE_ALIAS -storepass $SERVER_TRUSTSTORE_PASSWORD
+#keytool -list -v -keystore $SERVER_PATH/$SERVER.truststore.jks -alias $SERVER_TRUSTSTORE_ALIAS -storepass $SERVER_TRUSTSTORE_PASSWORD
 
 ########################################
 # Copies result to docker import

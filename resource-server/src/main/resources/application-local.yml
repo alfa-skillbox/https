@@ -1,32 +1,13 @@
-host: 'host.docker.internal'
+server:
+  port: 8081
+host: 'localhost'
 # This is keycloak from docker-compose.yml
-keycloak.uri: 'https://${host}:8443'
-
-# Конфигурация SSL через Spring properties
-# Для кастомной конфигурации SSL см. https://habr.com/ru/company/dbtc/blog/487318/
-# enable/disable https
-server.ssl.enabled: true
-# keystore format
-server.ssl.keyStoreType: ${KEYSTORE_TYPE}
-# keystore location
-server.ssl.keyStore: ${KEYSTORE_PATH}
-# keystore password
-server.ssl.keyStorePassword: ${KEYSTORE_PASSWORD}
-# SSL protocol to use
-server.ssl.protocol: TLS
-# Enabled SSL protocols
-server.ssl.enabledProtocols: TLSv1.2
-#trust store location
-#server.ssl.trustStore: classpath:localhost.server.truststore.jks
-#trust store password
-#server.ssl.trustStorePassword: qwerty
-#trust store format
-#server.ssl.trustStoreType: JKS
+keycloak.uri: 'http://${host}:8080'
 
 spring:
   datasource:
     name: "alfa-skillbox-https-resource-server"
-    url: "jdbc:postgresql://${host}:5432/alfa_skillbox_https_resource_server_db?ssl=true&sslmode=require"
+    url: "jdbc:postgresql://${host}:5432/alfa_skillbox_https_resource_server_db"
     username: 'postgres'
     password: 'postgres'
     driver-class-name: 'org.postgresql.Driver'

@@ -18,20 +18,19 @@ import javax.validation.constraints.NotEmpty;
 @RestController
 @Validated
 @RequestMapping(value = "/json",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class JsonController {
 
     private final JsonService jsonService;
 
-    @PostMapping("/save")
+    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JsonStateResponse> validateAndSave(@RequestBody @NotEmpty String rawJson) {
         return ResponseEntity.ok(jsonService.validateAndSave(rawJson));
     }
 
     @GetMapping("/find")
-    public ResponseEntity<JsonStateResponse> getJson(@RequestParam("id") @ValidId String id) {
+    public ResponseEntity<JsonStateResponse> findById(@RequestParam("id") @ValidId String id) {
         return ResponseEntity.ok(jsonService.find(Long.valueOf(id)));
     }
 }

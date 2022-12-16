@@ -1,4 +1,4 @@
-package ru.alfabank.skillbox.examples.https.server.dto;
+package ru.alfabank.skillbox.examples.https.server.restclient.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class HttpsServerResponse implements Serializable {
+public class ResourceServerResponse implements Serializable {
 
     private List<Object> errors;
 

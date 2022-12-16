@@ -11,32 +11,6 @@ group = 'ru.alfabank.skillbox.examples'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = targetCompatibility = '11'
 
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
-import org.apache.commons.lang3.StringUtils
-
-import static com.bmuschko.gradle.docker.DockerConventionJvmApplicationPlugin.DOCKERFILE_TASK_NAME
-
-docker {
-    springBootApplication {
-        baseImage = 'eclipse-temurin:17-jdk-alpine'
-        jvmArgs = ['-Xmx2048m', '$JAVA_OPTS']
-    }
-}
-// Меняем форму ENTRYPOINT из exec в shell, чтобы прокинуть переменную JAVA_OPTS.
-// Как альтернатива можно прокидывать переменную JAVA_TOOL_OPTIONS с флагами JVM
-project.tasks.named(DOCKERFILE_TASK_NAME, Dockerfile).get().with {
-    doFirst {
-        List<Dockerfile.Instruction> origInstructions = new ArrayList<>(it.instructions.get())
-
-        Dockerfile.EntryPointInstruction entryPoint =
-                origInstructions.find { it.keyword == Dockerfile.EntryPointInstruction.KEYWORD } as Dockerfile.EntryPointInstruction
-
-        origInstructions.set(origInstructions.indexOf(entryPoint), new ShellFormEntryPointInstruction(entryPoint))
-
-        it.instructions.set(origInstructions)
-    }
-}
-
 repositories {
     mavenCentral()
 }
@@ -95,6 +69,32 @@ tasks.named('test') {
 
 tasks.named('integrationTest') {
     useJUnitPlatform()
+}
+
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import org.apache.commons.lang3.StringUtils
+
+import static com.bmuschko.gradle.docker.DockerConventionJvmApplicationPlugin.DOCKERFILE_TASK_NAME
+
+docker {
+    springBootApplication {
+        baseImage = 'eclipse-temurin:17-jdk-alpine'
+        jvmArgs = ['-Xmx2048m', '$JAVA_OPTS']
+    }
+}
+// Меняем форму ENTRYPOINT из exec в shell, чтобы прокинуть переменную JAVA_OPTS.
+// Как альтернатива можно прокидывать переменную JAVA_TOOL_OPTIONS с флагами JVM
+project.tasks.named(DOCKERFILE_TASK_NAME, Dockerfile).get().with {
+    doFirst {
+        List<Dockerfile.Instruction> origInstructions = new ArrayList<>(it.instructions.get())
+
+        Dockerfile.EntryPointInstruction entryPoint =
+                origInstructions.find { it.keyword == Dockerfile.EntryPointInstruction.KEYWORD } as Dockerfile.EntryPointInstruction
+
+        origInstructions.set(origInstructions.indexOf(entryPoint), new ShellFormEntryPointInstruction(entryPoint))
+
+        it.instructions.set(origInstructions)
+    }
 }
 
 class ShellFormEntryPointInstruction implements Dockerfile.Instruction {
