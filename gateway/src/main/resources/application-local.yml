@@ -22,6 +22,8 @@ spring:
 logging:
   level:
     org.springframework: INFO
+    org.springframework.web.client: DEBUG
+    org.springframework.security.oauth2.client: DEBUG
 
 rest:
   client:
