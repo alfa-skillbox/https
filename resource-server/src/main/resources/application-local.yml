@@ -31,6 +31,9 @@ spring:
 logging:
   level:
     org.springfaramework: DEBUG
+    org.springframework.web.client: DEBUG
+    org.springframework.security.oauth2.client: DEBUG
+    org.springframework.security.oauth2.server.resource: DEBUG
     org.springfaramework.orm.jpa.JpaTransactionManager: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.desriptor.sql.BasicBinder: TRACE
