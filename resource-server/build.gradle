@@ -11,6 +11,12 @@ group = 'ru.alfabank.skillbox.examples'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = targetCompatibility = '11'
 
+bootRun {
+    jvmArgs = [
+            "-Djavax.net.debug=all"
+    ]
+}
+
 repositories {
     mavenCentral()
 }

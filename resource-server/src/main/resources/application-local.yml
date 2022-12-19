@@ -4,6 +4,27 @@ host: 'localhost'
 # This is keycloak from docker-compose.yml
 keycloak.uri: 'http://${host}:8080'
 
+# Конфигурация SSL через Spring properties
+# Для кастомной конфигурации SSL см. https://habr.com/ru/company/dbtc/blog/487318/
+# enable/disable https
+server.ssl.enabled: true
+# keystore format
+server.ssl.keyStoreType: JKS
+# keystore location
+server.ssl.keyStore: "classpath:resource-server.keystore.jks"
+# keystore password
+server.ssl.keyStorePassword: "resource-server-password"
+# SSL protocol to use
+server.ssl.protocol: TLS
+# Enabled SSL protocols
+server.ssl.enabledProtocols: TLSv1.2
+#trust store location
+#server.ssl.trustStore: classpath:resource-server.truststore.jks
+#trust store password
+#server.ssl.trustStorePassword: ""
+#trust store format
+#server.ssl.trustStoreType: JKS
+
 spring:
   datasource:
     name: "alfa-skillbox-https-resource-server"

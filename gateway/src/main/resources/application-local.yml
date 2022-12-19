@@ -26,5 +26,5 @@ logging:
 rest:
   client:
     httpsServer:
-      urlSave: 'http://${host}:8081/json/save'
-      urlFind: 'http://${host}:8081/json/find'
+      urlSave: 'https://${host}:8081/json/save'
+      urlFind: 'https://${host}:8081/json/find'
