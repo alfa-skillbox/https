@@ -89,6 +89,19 @@ keytool -v -keystore $SERVER_PATH/$SERVER.keystore.jks \
 #        extension params
 # Command: gencert
 # Output: PEM (with -rfc) or DER certificate file
+
+# -ext {name{:critical} {=value}}
+#BC or BasicConstraints
+#Values: The full form is: ca:{true|false}[,pathlen:<len>] or <len>, which is short for ca:true,pathlen:<len>. When <len> is omitted, you have ca:true.
+#
+#KU or KeyUsage
+#Values: usage(,usage)*, where usage can be one of digitalSignature, nonRepudiation (contentCommitment), keyEncipherment, dataEncipherment, keyAgreement, keyCertSign, cRLSign, encipherOnly, decipherOnly. The usage argument can be abbreviated with the first few letters (dig for digitalSignature) or in camel-case style (dS for digitalSignature or cRLS for cRLSign), as long as no ambiguity is found. The usage values are case-sensitive.
+#
+#EKU or ExtendedKeyUsage
+#Values: usage(,usage)*, where usage can be one of anyExtendedKeyUsage, serverAuth, clientAuth, codeSigning, emailProtection, timeStamping, OCSPSigning, or any OID string. The usage argument can be abbreviated with the first few letters or in camel-case style, as long as no ambiguity is found. The usage values are case-sensitive.
+#
+#SAN or SubjectAlternativeName
+#Values: type:value(,type:value)*, where type can be EMAIL, URI, DNS, IP, or OID. The value argument is the string format value for the type.
 ########################################
 keytool -v -keystore $ROOT_PATH/rootCA.jks \
         -storepass $ROOT_PASSWORD \
@@ -132,6 +145,7 @@ keytool -v -keystore $ROOT_PATH/rootCA.jks \
 # Input: Root CA .pem file, ssl-server .pem file
 # Command: cat
 # Output: chained (combined) ssl-server .pem cert
+# без этого шага получаем keytool error: java.lang.Exception: Failed to establish chain from reply
 ########################################
 cat $ROOT_PATH/$ROOT_CERT_PEM_NAME $SERVER_PATH/$SERVER.temp.pem > $SERVER_PATH/$SERVER.pem
 
@@ -163,11 +177,11 @@ keytool -list -v -keystore $SERVER_PATH/$SERVER.keystore.jks -alias $SERVER_KEYS
 # Command: import (or importcert)
 # Output: новый файл truststore формата JKS с сертификатом Root CA
 ########################################
-keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
-        -storepass $SERVER_TRUSTSTORE_PASSWORD \
-        -alias $SERVER_TRUSTSTORE_ALIAS \
-        -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
-        -import -trustcacerts
+#keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
+#        -storepass $SERVER_TRUSTSTORE_PASSWORD \
+#        -alias $SERVER_TRUSTSTORE_ALIAS \
+#        -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+#        -import -trustcacerts
 
 # 2 Optional ###########################
 # Imports jdk's public CA certs (from cacerts keystore) inside our truststore.jks
