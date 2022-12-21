@@ -104,7 +104,7 @@ cp $POSTGRE_PATH/$POSTGRE.crt $PATH_TO_COPY/server.crt
 sudo chmod 600 $PATH_TO_COPY/server.key
 
 # генерация файла конфигурации pg_hba.conf для инициализации SSL в postgres
-echo 'hostssl all all all cert clientcert=verify-ca' > $POSTGRE_PATH/pg_hba.conf
+echo 'hostssl alfa_skillbox_https_resource_server_db postgres all md5' > $POSTGRE_PATH/pg_hba.conf
 cp $POSTGRE_PATH/pg_hba.conf $PATH_TO_INIT/pg_hba.conf
 
 # генерация скрипта, который подложит pg_hba.conf вместо дефолтного после старта postgres
