@@ -28,6 +28,14 @@ server.ssl.enabledProtocols: TLSv1.2
 spring:
   datasource:
     name: "alfa-skillbox-https-resource-server"
+
+#  disable	    only try a non-SSL connection
+#  allow	    first try a non-SSL connection; if that fails, try an SSL connection
+#  prefer       (default)	first try an SSL connection; if that fails, try a non-SSL connection
+#  require	    only try an SSL connection. If a root CA file is present, verify the certificate in the same way as if verify-ca was specified
+#  verify-ca	only try an SSL connection, and verify that the server certificate is issued by a trusted CA.
+#  verify-full	only try an SSL connection, verify that the server certificate is issued by a trusted CA and that the server hostname matches that in the certificate.
+
     url: "jdbc:postgresql://${host}:5432/alfa_skillbox_https_resource_server_db?ssl=true&sslmode=require"
     username: 'postgres'
     password: 'postgres'
