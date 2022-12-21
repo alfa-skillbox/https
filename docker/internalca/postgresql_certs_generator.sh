@@ -21,6 +21,7 @@ POSTGRE_PATH=./$POSTGRE
 #--- DOCKER IMPORT VARS
 ###########################
 PATH_TO_COPY=../imports/$POSTGRE/certs
+PATH_TO_INIT=../imports/$POSTGRE/init
 
 mkdir -p $POSTGRE_PATH
 mkdir -p $PATH_TO_COPY
@@ -101,3 +102,16 @@ cp $POSTGRE_PATH/$POSTGRE.crt $PATH_TO_COPY/server.crt
 # solved "postgres using ssl" problem with
 # https://stackoverflow.com/questions/55072221/deploying-postgresql-docker-with-ssl-certificate-and-key-with-volumes
 sudo chmod 600 $PATH_TO_COPY/server.key
+
+# генерация файла конфигурации pg_hba.conf для инициализации SSL в postgres
+echo 'hostssl all all all cert clientcert=verify-ca' > $POSTGRE_PATH/pg_hba.conf
+cp $POSTGRE_PATH/pg_hba.conf $PATH_TO_INIT/pg_hba.conf
+
+# генерация скрипта, который подложит pg_hba.conf вместо дефолтного после старта postgres
+# проверка исполнения через > cat /var/lib/postgresql/data/pg_hba.conf из консоли докера
+>$POSTGRE_PATH/init_pg_hba.sh cat <<-EOF
+#!/bin/sh
+cp -f /var/lib/postgresql/pg_hba.conf /var/lib/postgresql/data/pg_hba.conf
+EOF
+sudo chmod +x $POSTGRE_PATH/init_pg_hba.sh
+cp $POSTGRE_PATH/init_pg_hba.sh $PATH_TO_INIT/init_pg_hba.sh
