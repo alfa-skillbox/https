@@ -28,7 +28,7 @@ SERVER_TRUSTSTORE_PASSWORD=$SERVER-password
 #--- YOUR JDK'S CACERTS VARS
 ###########################
 # TODO Для успешной работы замените текущий путь на путь к cacerts в своем jdk
-#CACERTS_PATH=~/.sdkman/candidates/java/current/lib/security/cacerts
+CACERTS_PATH=~/.sdkman/candidates/java/current/lib/security/cacerts
 ###########################
 #--- DOCKER IMPORT VARS
 ###########################
@@ -190,12 +190,12 @@ keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
 # Command: importkeystore
 # Output: updated SSL-client trustStore .jks
 ########################################
-#keytool -srckeystore $CACERTS_PATH \
-#        -srcstorepass changeit \
-#        -destkeystore $SERVER_PATH/$SERVER.truststore.jks \
-#        -deststorepass $SERVER_TRUSTSTORE_PASSWORD \
-#        -deststoretype JKS \
-#        -importkeystore
+keytool -srckeystore $CACERTS_PATH \
+        -srcstorepass changeit \
+        -destkeystore $SERVER_PATH/$SERVER.truststore.jks \
+        -deststorepass $SERVER_TRUSTSTORE_PASSWORD \
+        -deststoretype JKS \
+        -importkeystore
 
 ########################################
 # Checks certs inside SSL-client trustStore .jks
