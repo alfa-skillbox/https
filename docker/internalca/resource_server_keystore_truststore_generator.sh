@@ -28,7 +28,7 @@ SERVER_TRUSTSTORE_PASSWORD=$SERVER-password
 #--- YOUR JDK'S CACERTS VARS
 ###########################
 # TODO Для успешной работы замените текущий путь на путь к cacerts в своем jdk
-#CACERTS_PATH=~/.sdkman/candidates/java/current/lib/security/cacerts
+CACERTS_PATH=~/.sdkman/candidates/java/current/lib/security/cacerts
 ###########################
 #--- DOCKER IMPORT VARS
 ###########################
@@ -177,11 +177,11 @@ keytool -list -v -keystore $SERVER_PATH/$SERVER.keystore.jks -alias $SERVER_KEYS
 # Command: import (or importcert)
 # Output: новый файл truststore формата JKS с сертификатом Root CA
 ########################################
-#keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
-#        -storepass $SERVER_TRUSTSTORE_PASSWORD \
-#        -alias $SERVER_TRUSTSTORE_ALIAS \
-#        -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
-#        -import -trustcacerts
+keytool -v -keystore $SERVER_PATH/$SERVER.truststore.jks \
+        -storepass $SERVER_TRUSTSTORE_PASSWORD \
+        -alias $SERVER_TRUSTSTORE_ALIAS \
+        -file $ROOT_PATH/$ROOT_CERT_PEM_NAME \
+        -import -trustcacerts
 
 # 2 Optional ###########################
 # Imports jdk's public CA certs (from cacerts keystore) inside our truststore.jks
@@ -190,17 +190,17 @@ keytool -list -v -keystore $SERVER_PATH/$SERVER.keystore.jks -alias $SERVER_KEYS
 # Command: importkeystore
 # Output: updated SSL-client trustStore .jks
 ########################################
-#keytool -srckeystore $CACERTS_PATH \
-#        -srcstorepass changeit \
-#        -destkeystore $SERVER_PATH/$SERVER.truststore.jks \
-#        -deststorepass $SERVER_TRUSTSTORE_PASSWORD \
-#        -deststoretype JKS \
-#        -importkeystore
+keytool -srckeystore $CACERTS_PATH \
+        -srcstorepass changeit \
+        -destkeystore $SERVER_PATH/$SERVER.truststore.jks \
+        -deststorepass $SERVER_TRUSTSTORE_PASSWORD \
+        -deststoretype JKS \
+        -importkeystore
 
 ########################################
 # Checks certs inside SSL-client trustStore .jks
 ########################################
-#keytool -list -v -keystore $SERVER_PATH/$SERVER.truststore.jks -alias $SERVER_TRUSTSTORE_ALIAS -storepass $SERVER_TRUSTSTORE_PASSWORD
+keytool -list -v -keystore $SERVER_PATH/$SERVER.truststore.jks -alias $SERVER_TRUSTSTORE_ALIAS -storepass $SERVER_TRUSTSTORE_PASSWORD
 
 ########################################
 # Copies result to docker import

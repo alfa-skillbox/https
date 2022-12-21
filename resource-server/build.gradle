@@ -13,6 +13,9 @@ sourceCompatibility = targetCompatibility = '11'
 
 bootRun {
     jvmArgs = [
+            "-Djavax.net.ssl.trustStore=$truststore_path",
+            "-Djavax.net.ssl.trustStorePassword=$truststore_password",
+            "-Djavax.net.ssl.trustStoreType=JKS",
             "-Djavax.net.debug=all"
     ]
 }

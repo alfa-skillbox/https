@@ -4,8 +4,8 @@
   "clients": [
     {
       "clientId" : "gateway",
-      "rootUrl" : "http://localhost:8080",
-      "baseUrl" : "http://localhost:8080/*",
+      "rootUrl" : "https://localhost:8443",
+      "baseUrl" : "https://localhost:8443/*",
       "surrogateAuthRequired" : false,
       "enabled" : true,
       "alwaysDisplayInConsole" : false,

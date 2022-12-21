@@ -2,7 +2,7 @@ server:
   port: 8081
 host: 'localhost'
 # This is keycloak from docker-compose.yml
-keycloak.uri: 'http://${host}:8080'
+keycloak.uri: 'https://${host}:8443'
 
 # Конфигурация SSL через Spring properties
 # Для кастомной конфигурации SSL см. https://habr.com/ru/company/dbtc/blog/487318/

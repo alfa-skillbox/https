@@ -10,11 +10,14 @@ services:
       KEYCLOAK_PASSWORD: 'admin'
       DB_VENDOR: 'h2'
       KEYCLOAK_LOGLEVEL: "INFO"
+      SERVER_KEYSTORE_PASSWORD: 'keycloak-password'
       KEYCLOAK_IMPORT: "/tmp/example-realm.json"
     volumes:
+      - ./imports/keycloak/keycloak.crt:/etc/x509/https/tls.crt
+      - ./imports/keycloak/keycloak.key.pem:/etc/x509/https/tls.key
       - ./imports/keycloak/realm-config.json:/tmp/example-realm.json
     ports:
-      - "8080:8080"
+      - "8443:8443"
 
   resource-server:
     image: "ru.alfabank.skillbox.examples/resource-server:0.0.1-snapshot"

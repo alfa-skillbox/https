@@ -2,7 +2,7 @@ server:
   port: 8082
 host: 'localhost'
 # This is keycloak from docker-compose.yml
-keycloak.uri: 'http://${host}:8080'
+keycloak.uri: 'https://${host}:8443'
 spring:
   security:
     oauth2:
