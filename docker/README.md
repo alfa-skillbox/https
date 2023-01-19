@@ -25,3 +25,12 @@ docker exec -it keycloak-local /opt/jboss/keycloak/bin/standalone.sh \
 postgre_up.sh - билдит и запускает контейнер postgres и его админку adminer
 postgre_down.sh - стопает сервис и удаляет контейнер postgres и его админку adminer
 postgre_down_and_clean_db.sh - стопает сервис и удаляет контейнер postgres и его volumes и его админку adminer
+
+##Сервисы gateway и resource-server
+Отдельно можно поднять сервисы в докере. В docker-compose вы можете увидеть как
+их поднимают, передавая настройки truststore и keystore через JAVA_OPTS системную переменную.
+Чтобы через JAVA_OPTS работало, необходимо правильно собрать докер образ. 
+Для этого внимательно изучите build.gradle сервисов. Внизу каждого вы найдете примеры,
+как подтянуть JAVA_OPTS в образ при сборке. 
+
+Каждый сервис также имеет свои .sh скрипты для старта и удаления. 

@@ -1,0 +1,258 @@
+{
+	"info": {
+		"_postman_id": "1c3dcb06-be26-4ad5-8d1f-83249ca4fac8",
+		"name": "skillbox-https",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "client",
+			"item": [
+				{
+					"name": "health-check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{client-host}}/actuator/health",
+							"host": [
+								"{{client-host}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{client-host}}{{client-path}}/find?id=275",
+							"host": [
+								"{{client-host}}{{client-path}}"
+							],
+							"path": [
+								"find"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "275"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "save",
+					"protocolProfileBehavior": {
+						"strictSSL": false
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"foo\": {\n        \"ggg\": \"vvo\",\n        \"asdfda\": \"adfa\"\n    },\n    \"bar\": [\n        1,\n        2,\n        3\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{client-host}}{{client-path}}/save",
+							"host": [
+								"{{client-host}}{{client-path}}"
+							],
+							"path": [
+								"save"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "server",
+			"item": [
+				{
+					"name": "save",
+					"protocolProfileBehavior": {
+						"strictSSL": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJCX2JkblVHSEc5UC0yOHVpSDlOeElnN1FqNnVucWJXZWJhNG02TFZtMU44In0.eyJleHAiOjE2NzIyNTI4OTQsImlhdCI6MTY3MjI0OTI5NCwianRpIjoiOWU1OGYwYjUtY2JhOC00NGZkLTljZTUtMjIyN2FiZGU2MGZlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL2FsZmEtc2tpbGxib3gtaHR0cHMiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNjdhZGRmMGMtOGZiMS00MmJmLWIwMmQtMGFhOGE5YTZiYzJmIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZ2F0ZXdheSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWFsZmEtc2tpbGxib3gtaHR0cHMiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiY2xpZW50SG9zdCI6IjE3Mi4yNS4wLjEiLCJjbGllbnRJZCI6ImdhdGV3YXkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZ2F0ZXdheSIsImNsaWVudEFkZHJlc3MiOiIxNzIuMjUuMC4xIn0.gs-2-V-qBX4WGxalDuFoSGwS8t2QasnNVN2u90qgDeZkdxfQ6uLZbLRBoD-b_Es33tcnxzH_Lg4J15IR_MednAzLalM-HQ80HsD06JkUzSLjqtlhdyvb9ok8-PuECQb94MAWtcLUmljmm7C6OTZjYwvOWXYzL5Oekv7UKR9D0gjPZOFse2w_TWnBxYHENUuLOhyimVHv29QhTpAOFmjQ7_TKbkfPw47VTslYq1ZQwio-o0pz546INvRHI-UffOhNZMuR5rHEsMx9lPCBnhdRH7XWRf9pmjzodgtQpcuIpzDIMCd9QmDnWppLjmeUlSPhidWUmhzMmLGOIKDoQkLWLg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"foo\": {\"ggg\": \"vvvvvvoo\",\n    \"asdfda\": \"adfa\"},\n    \"bar\": [\n        1,\n        2,\n        3\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{server-host}}{{server-path}}/save",
+							"host": [
+								"{{server-host}}{{server-path}}"
+							],
+							"path": [
+								"save"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "health-check",
+					"protocolProfileBehavior": {
+						"strictSSL": false
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-host}}/actuator/health",
+							"host": [
+								"{{server-host}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "keycloak",
+			"item": [
+				{
+					"name": "get token",
+					"protocolProfileBehavior": {
+						"strictSSL": false
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "gateway",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "CeCdMsVRRWjUKobxGtvH1mnc0PR08esW",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{keycloak}}/auth/realms/alfa-skillbox-https/protocol/openid-connect/token",
+							"host": [
+								"{{keycloak}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"alfa-skillbox-https",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "jwk-set-uri",
+					"protocolProfileBehavior": {
+						"strictSSL": false
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{keycloak}}/auth/realms/alfa-skillbox-https/protocol/openid-connect/certs",
+							"host": [
+								"{{keycloak}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"alfa-skillbox-https",
+								"protocol",
+								"openid-connect",
+								"certs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
